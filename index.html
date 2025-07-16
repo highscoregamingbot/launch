@@ -328,9 +328,9 @@ html, body {
 // ---- 1. gameId ophalen (querystring of path) ----
 let gameId = "";
 const urlParams = new URLSearchParams(window.location.search);
-// Eerst uit querystring: ?game=mazerunner
+// Eerst uit querystring: ?game=maze_runner
 gameId = urlParams.get("game");
-// Anders uit path: /launch/mazerunner
+// Anders uit path: /launch/maze_runner
 if (!gameId) {
   const pathParts = window.location.pathname.split("/").filter(Boolean);
   if (pathParts.length >= 2) {
@@ -379,16 +379,17 @@ console.log("unityData", unityData);
 const GAMES = {
   maze_runner: {
     title: "Maze Runner",
-    loaderUrl: "mazerunner/Build/maze.loader.js",
+    loaderUrl: "maze_runner/Build/maze.loader.js",
     config: { 
-      dataUrl: "mazerunner/Build/mazerunner.data",
-      frameworkUrl: "mazerunner/Build/mazerunner.framework.js",
-      codeUrl: "mazerunner/Build/mazerunner.wasm",
-      streamingAssetsUrl: "StreamingAssets",
+      dataUrl: "maze_runner/Build/maze_runner.data",
+      frameworkUrl: "maze_runner/Build/maze_runner.framework.js",
+      codeUrl: "maze_runner/Build/maze_runner.wasm",
+      streamingAssetsUrl: "maze_runner/Build/StreamingAssets",
       companyName: "Highscore Gaming",
       productName: "Maze Runner",
       productVersion: "0.1",
-      showBanner: unityShowBanner},
+      showBanner: unityShowBanner
+    }
   },
   ghosty: {
     title: "Ghosty",
@@ -397,12 +398,13 @@ const GAMES = {
       dataUrl: "ghosty/Build/ghosty.data",
       frameworkUrl: "ghosty/Build/ghosty.framework.js",
       codeUrl: "ghosty/Build/ghosty.wasm",
-      streamingAssetsUrl: "StreamingAssets",
+      streamingAssetsUrl: "ghosty/Build/StreamingAssets",
       companyName: "Highscore Gaming",
       productName: "Ghosty",
       productVersion: "0.1",
-      showBanner: unityShowBanner,},
-};
+      showBanner: unityShowBanner
+    }
+  },
   brickbreaker: {
     title: "Brick Breaker",
     loaderUrl: "brickbreaker/Build/brickbreaker.loader.js",
@@ -410,25 +412,27 @@ const GAMES = {
       dataUrl: "brickbreaker/Build/brickbreaker.data",
       frameworkUrl: "brickbreaker/Build/brickbreaker.framework.js",
       codeUrl: "brickbreaker/Build/brickbreaker.wasm",
-      streamingAssetsUrl: "StreamingAssets",
+      streamingAssetsUrl: "brickbreaker/Build/StreamingAssets",
       companyName: "Highscore Gaming",
       productName: "Brick Breaker",
       productVersion: "0.1",
-      showBanner: unityShowBanner,},
-};
-  od: {
+      showBanner: unityShowBanner
+    }
+  },
+  oldmanrush: {
     title: "Oldman Rush",
     loaderUrl: "oldmanrush/Build/oldmanrush.loader.js",
     config: {        
-      dataUrl: buildUrl + "oldmanrush/Build/oldmanrush.data",
-      frameworkUrl: buildUrl + "oldmanrush/Build/oldmanrush.framework.js",
-      codeUrl: buildUrl + "oldmanrush/Build/oldmanrush.wasm",
-      streamingAssetsUrl: "StreamingAssets",
+      dataUrl: "oldmanrush/Build/oldmanrush.data",
+      frameworkUrl: "oldmanrush/Build/oldmanrush.framework.js",
+      codeUrl: "oldmanrush/Build/oldmanrush.wasm",
+      streamingAssetsUrl: "oldmanrush/Build/StreamingAssets",
       companyName: "Highscore Gaming",
-      productName: "Maze",
+      productName: "Oldman Rush",
       productVersion: "0.1",
-      showBanner: unityShowBanner,
-    };,
+      showBanner: unityShowBanner
+    }
+  }
 };
 
       // ---- Unity direct laden bij paginalaad ----

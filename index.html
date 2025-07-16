@@ -450,6 +450,7 @@ if (gameConfig) {
   var script = document.createElement("script");
   script.src = gameConfig.loaderUrl;
   script.onload = () => {
+    console.log("✅ Unity loader geladen:", script.src);
     createUnityInstance(canvas, gameConfig.config, (progress) => {
       // evt. loading visuals
     }).then((unityInstance) => {

@@ -325,33 +325,30 @@ html, body {
       const playButton = document.getElementById("play-button");
       const playButtonContainer = document.getElementById("play-button-container");
 
-// ---- 1. gameId ophalen (querystring of path) ----
-let gameId = "";
-const urlParams = new URLSearchParams(window.location.search);
-// Eerst uit querystring: ?game=maze_runner
-gameId = urlParams.get("game");
-// Anders uit path: /launch/maze_runner
-if (!gameId) {
-  const pathParts = window.location.pathname.split("/").filter(Boolean);
-  if (pathParts.length >= 2) {
-    gameId = pathParts[1];
-  }
-}
-
-// ---- 2. chatId ophalen (functie) ----
-function getDecodedChatId() {
+// ---- 2. Start parameters ophalen en decoderen als JSON (zonder URL fallback) ----
+function getStartParamData() {
   let param = urlParams.get('startapp') || urlParams.get('start_param');
   if (!param && window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) {
     param = Telegram.WebApp.initDataUnsafe.start_param;
   }
-  if (param) {
-    let b64 = param.replace(/-/g, '+').replace(/_/g, '/');
-    while (b64.length % 4) b64 += '=';
-    try { return atob(b64); } catch (e) { return ""; }
+  if (!param) return null;
+
+  let b64 = param.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  try {
+    const jsonStr = atob(b64);
+    return JSON.parse(jsonStr);
+  } catch(e) {
+    console.error("start_param decode error", e);
+    return null;
   }
-  return "";
 }
-const chatId = getDecodedChatId();
+
+const startData = getStartParamData();
+
+const chatId = startData?.chatId || "";
+const gameId = startData?.gameId || "";
+
 
 // ---- 3. Telegram user info ----
 const tgInitData = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) || {};

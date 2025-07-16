@@ -325,29 +325,111 @@ html, body {
       const playButton = document.getElementById("play-button");
       const playButtonContainer = document.getElementById("play-button-container");
 
-      function getDecodedChatId() {
-        // 1. Eerst uit URL
-        const urlParams = new URLSearchParams(window.location.search);
-        let param = urlParams.get('startapp') || urlParams.get('start_param');
-        // 2. Anders uit Telegram initData
-        if (!param && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) {
-          param = Telegram.WebApp.initDataUnsafe.start_param;
-        }
-        if (param) {
-          let b64 = param.replace(/-/g, '+').replace(/_/g, '/');
-          while (b64.length % 4) b64 += '=';
-          try { return atob(b64); } catch (e) { return ""; }
-        }
-        return "";
-      }
-      const chatId = getDecodedChatId();
-      const gameId = "";
-      const initData = Telegram.WebApp.initDataUnsafe || {};
-      const telegramId = initData.user?.id || "";
-      const username = initData.user?.username || "";
-      const firstName = initData.user?.first_name || "";
-      const lastName = initData.user?.last_name || "";
-      const unityData = `${telegramId};${username};${chatId};${firstName};${lastName};${gameId}`;
+// ---- 1. gameId ophalen (querystring of path) ----
+let gameId = "";
+const urlParams = new URLSearchParams(window.location.search);
+// Eerst uit querystring: ?game=mazerunner
+gameId = urlParams.get("game");
+// Anders uit path: /launch/mazerunner
+if (!gameId) {
+  const pathParts = window.location.pathname.split("/").filter(Boolean);
+  if (pathParts.length >= 2) {
+    gameId = pathParts[1];
+  }
+}
+
+// ---- 2. chatId ophalen (functie) ----
+function getDecodedChatId() {
+  let param = urlParams.get('startapp') || urlParams.get('start_param');
+  if (!param && window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) {
+    param = Telegram.WebApp.initDataUnsafe.start_param;
+  }
+  if (param) {
+    let b64 = param.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    try { return atob(b64); } catch (e) { return ""; }
+  }
+  return "";
+}
+const chatId = getDecodedChatId();
+
+// ---- 3. Telegram user info ----
+const tgInitData = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) || {};
+const telegramId = tgInitData.user?.id || "";
+const username = tgInitData.user?.username || "";
+const firstName = tgInitData.user?.first_name || "";
+const lastName = tgInitData.user?.last_name || "";
+
+// ---- 4. Object voor Unity en API ----
+const userData = {
+  telegramId,
+  username,
+  chatId,
+  firstName,
+  lastName,
+  gameId
+};
+const unityData = `${telegramId};${username};${chatId};${firstName};${lastName};${gameId}`;
+
+// --- DEBUG (optioneel) ---
+console.log("userData", userData);
+console.log("unityData", unityData);
+
+// --- Game configuraties ---
+const GAMES = {
+  maze_runner: {
+    title: "Maze Runner",
+    loaderUrl: "mazerunner/Build/maze.loader.js",
+    config: { 
+      dataUrl: "mazerunner/Build/mazerunner.data",
+      frameworkUrl: "mazerunner/Build/mazerunner.framework.js",
+      codeUrl: "mazerunner/Build/mazerunner.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Highscore Gaming",
+      productName: "Maze Runner",
+      productVersion: "0.1",
+      showBanner: unityShowBanner},
+  },
+  ghosty: {
+    title: "Ghosty",
+    loaderUrl: "ghosty/Build/ghosty.loader.js",
+    config: {        
+      dataUrl: "ghosty/Build/ghosty.data",
+      frameworkUrl: "ghosty/Build/ghosty.framework.js",
+      codeUrl: "ghosty/Build/ghosty.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Highscore Gaming",
+      productName: "Ghosty",
+      productVersion: "0.1",
+      showBanner: unityShowBanner,},
+};
+  brickbreaker: {
+    title: "Brick Breaker",
+    loaderUrl: "brickbreaker/Build/brickbreaker.loader.js",
+    config: {        
+      dataUrl: "brickbreaker/Build/brickbreaker.data",
+      frameworkUrl: "brickbreaker/Build/brickbreaker.framework.js",
+      codeUrl: "brickbreaker/Build/brickbreaker.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Highscore Gaming",
+      productName: "Brick Breaker",
+      productVersion: "0.1",
+      showBanner: unityShowBanner,},
+};
+  od: {
+    title: "Oldman Rush",
+    loaderUrl: "oldmanrush/Build/oldmanrush.loader.js",
+    config: {        
+      dataUrl: buildUrl + "oldmanrush/Build/oldmanrush.data",
+      frameworkUrl: buildUrl + "oldmanrush/Build/oldmanrush.framework.js",
+      codeUrl: buildUrl + "oldmanrush/Build/oldmanrush.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Highscore Gaming",
+      productName: "Maze",
+      productVersion: "0.1",
+      showBanner: unityShowBanner,
+    };,
+};
 
       // ---- Unity direct laden bij paginalaad ----
       // Zet de playknop direct zichtbaar maar disabled, tekst "⏳ Loading..."
@@ -355,27 +437,35 @@ playButtonContainer.style.display = "block";
 playButton.disabled = true;
 playButton.textContent = "⏳ Loading...";
 
-var script = document.createElement("script");
-script.src = loaderUrl;
-script.onload = () => {
-  createUnityInstance(canvas, config, (progress) => {
-    // evt. loading visuals
-  }).then((unityInstance) => {
-    // ---- Telegram-data direct sturen ----
-    unityInstance.SendMessage("TelegramParams", "SetTelegramUserData", unityData);
+const gameConfig = GAMES[gameId];
 
-    // Unity is geladen, tekst naar "⏳ Game starting..."
-    playButton.textContent = "⏳ Game starting...";
+if (gameConfig) {
+  playButtonContainer.style.display = "block";
+  playButton.disabled = true;
+  playButton.textContent = "⏳ Loading...";
 
-    // Wacht 5 seconden extra, daarna knop activeren
-    setTimeout(() => {
-      playButton.disabled = false;
-      playButton.textContent = "▶️ Play";
-      isLoaded = true;
-    }, 5000);
-  });
-};
-document.body.appendChild(script);
+  var script = document.createElement("script");
+  script.src = gameConfig.loaderUrl;
+  script.onload = () => {
+    createUnityInstance(canvas, gameConfig.config, (progress) => {
+      // evt. loading visuals
+    }).then((unityInstance) => {
+      unityInstance.SendMessage("TelegramParams", "SetTelegramUserData", unityData);
+
+      playButton.textContent = "⏳ Game starting...";
+      setTimeout(() => {
+        playButton.disabled = false;
+        playButton.textContent = "▶️ Play";
+        isLoaded = true;
+      }, 5000);
+    });
+  };
+  document.body.appendChild(script);
+} else {
+  playButtonContainer.style.display = "none";
+  alert("Deze game bestaat niet!");
+}
+
       // ---- Einde Unity direct laden ----
 
       window.addEventListener('resize', function() {

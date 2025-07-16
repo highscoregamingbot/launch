@@ -327,26 +327,41 @@ html, body {
 
 // ---- 1. URL params uitlezen ----
 const urlParams = new URLSearchParams(window.location.search);
-      
+console.log("🌐 Huidige URL:", window.location.href);
+
+console.log("🧩 urlParams.get('startapp'):", urlParams.get('startapp'));
+console.log("🧩 urlParams.get('start_param'):", urlParams.get('start_param'));
+
+if (Telegram?.WebApp?.initDataUnsafe) {
+  console.log("📦 Telegram.WebApp.initDataUnsafe:", Tele
+
 // ---- 2. Start parameters ophalen en decoderen als JSON (zonder URL fallback) ----
 function getStartParamData() {
   let param = urlParams.get('startapp') || urlParams.get('start_param');
-  if (!param && window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.start_param) {
+
+  if (!param && Telegram?.WebApp?.initDataUnsafe?.start_param) {
     param = Telegram.WebApp.initDataUnsafe.start_param;
   }
-  console.log("📦 start_param binnengekomen:", param); // <--- voeg toe
+
+  console.log("📦 start_param binnengekomen (gebruikt):", param);
+
   if (!param) return null;
 
   let b64 = param.replace(/-/g, '+').replace(/_/g, '/');
   while (b64.length % 4) b64 += '=';
+
   try {
     const jsonStr = atob(b64);
-    return JSON.parse(jsonStr);
+    console.log("📖 start_param als JSON string:", jsonStr);
+    const parsed = JSON.parse(jsonStr);
+    console.log("✅ Parsed startData:", parsed);
+    return parsed;
   } catch(e) {
-    console.error("start_param decode error", e);
+    console.error("❌ start_param decode/parsing error", e);
     return null;
   }
 }
+
 
 const startData = getStartParamData();
 console.log("📦 startData inhoud:", startData);

@@ -3,7 +3,6 @@
 <html lang="en-us">
   <head>
     <meta charset="utf-8">
-    <title>Maze Runner</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -323,17 +322,6 @@ html, body {
 
     <script>
       var canvas = document.getElementById("unity-canvas");
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/mazerunner.loader.js";
-      var config = {
-        dataUrl: buildUrl + "/mazerunner.data",
-        frameworkUrl: buildUrl + "/mazerunner.framework.js",
-        codeUrl: buildUrl + "/mazerunner.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "Highscore Gaming",
-        productName: "Maze",
-        productVersion: "0.1"
-      };
       const playButton = document.getElementById("play-button");
       const playButtonContainer = document.getElementById("play-button-container");
 
@@ -353,7 +341,7 @@ html, body {
         return "";
       }
       const chatId = getDecodedChatId();
-      const gameId = "maze_runner";
+      const gameId = "";
       const initData = Telegram.WebApp.initDataUnsafe || {};
       const telegramId = initData.user?.id || "";
       const username = initData.user?.username || "";

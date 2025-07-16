@@ -333,7 +333,11 @@ console.log("🧩 urlParams.get('startapp'):", urlParams.get('startapp'));
 console.log("🧩 urlParams.get('start_param'):", urlParams.get('start_param'));
 
 if (Telegram?.WebApp?.initDataUnsafe) {
-  console.log("📦 Telegram.WebApp.initDataUnsafe:", Tele
+  console.log("📦 Telegram.WebApp.initDataUnsafe:", Telegram.WebApp.initDataUnsafe);
+  console.log("📦 Telegram.WebApp.initDataUnsafe.start_param:", Telegram.WebApp.initDataUnsafe.start_param);
+} else {
+  console.warn("⚠️ Telegram.WebApp.initDataUnsafe niet beschikbaar!");
+}
 
 // ---- 2. Start parameters ophalen en decoderen als JSON (zonder URL fallback) ----
 function getStartParamData() {

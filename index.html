@@ -325,6 +325,9 @@ html, body {
       const playButton = document.getElementById("play-button");
       const playButtonContainer = document.getElementById("play-button-container");
 
+// ---- 1. URL params uitlezen ----
+const urlParams = new URLSearchParams(window.location.search);
+      
 // ---- 2. Start parameters ophalen en decoderen als JSON (zonder URL fallback) ----
 function getStartParamData() {
   let param = urlParams.get('startapp') || urlParams.get('start_param');
@@ -343,12 +346,11 @@ function getStartParamData() {
     return null;
   }
 }
-
+      
+const urlParams = new URLSearchParams(window.location.search);
 const startData = getStartParamData();
-
 const chatId = startData?.chatId || "";
 const gameId = startData?.gameId || "";
-
 
 // ---- 3. Telegram user info ----
 const tgInitData = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) || {};

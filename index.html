@@ -294,7 +294,7 @@ html, body {
     <div class="tab" data-tab="chat">💬 Top Chats</div>
   </div>
 
-  <div class="leaderboard-scroll-container">
+  <div class="leaderboard-scroll-container" style="display: none;">
     <select id="limit-select">
       <option value="10">Top 10</option>
       <option value="20">Top 20</option>
@@ -607,7 +607,7 @@ tabs.forEach(btn => {
   btn.addEventListener("click", () => {
     // ✅ Verberg start-scherm bij tab-click
     document.getElementById("start-screen").style.display = "none";
-
+    document.querySelector(".leaderboard-scroll-container").style.display = "flex";
     document.querySelector(".tab.active")?.classList.remove("active");
     btn.classList.add("active");
 

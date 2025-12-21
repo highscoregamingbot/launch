@@ -378,8 +378,20 @@ function getStartParamData() {
 
 const startData = getStartParamData();
 console.log("📦 startData inhoud:", startData);
-const chatId = startData?.chatId || "";
-const gameId = startData?.gameId || "";
+
+// Haal gameId uit startData OF uit de URL path (voor directe links zoals /highscore_heroes)
+let chatId = startData?.chatId || "";
+let gameId = startData?.gameId || "";
+
+// Fallback: als geen gameId in startData, check URL path
+if (!gameId) {
+  const pathParts = window.location.pathname.split('/').filter(p => p);
+  const lastPart = pathParts[pathParts.length - 1];
+  if (lastPart && lastPart !== 'launch.html') {
+    gameId = lastPart;
+    console.log("📦 gameId from URL path:", gameId);
+  }
+}
 
 // ---- 3. Telegram user info ----
 const tgInitData = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) || {};

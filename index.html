@@ -695,14 +695,13 @@ async function loadPregameData(gameId) {
       return name && name !== '—' && isNaN(name);
     });
 
-    // Find user's best score in alltime leaderboard
+    // Fetch user's personal best score
     let myScore = null;
     if (telegramId) {
       try {
-        const atRes = await fetch(`${baseURL}/alltime_leaderboard?game_id=${gameId}&chat_id=${chatId}&limit=200`);
+        const atRes = await fetch(`${baseURL}/my_best_score/${telegramId}/${gameId}`);
         const atData = await atRes.json();
-        const myEntry = (atData.scores || []).find(e => String(e.telegram_id) === String(telegramId));
-        if (myEntry) myScore = myEntry.score ?? myEntry.points ?? null;
+        if (atData.score !== null && atData.score !== undefined) myScore = atData.score;
       } catch(e) {}
     }
 

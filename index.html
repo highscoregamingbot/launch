@@ -96,16 +96,20 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 }
 
 .game-card-title {
-  padding: 8px 10px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 18px 8px 8px;
   font-size: 13px;
   font-weight: 700;
   color: #fff;
-  text-shadow: 0 0 8px #000, 0 0 4px #000;
+  text-shadow: 0 1px 4px #000;
   letter-spacing: 0.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: rgba(10, 0, 30, 0.85);
+  background: linear-gradient(transparent, rgba(0,0,0,0.85));
 }
 
 .play-badge {
@@ -396,25 +400,20 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 body.fullscreen .ui-overlay { transform: translateY(100%); }
 
-#hud-btn {
+#swipe-hint {
   display: none;
   position: fixed;
-  top: 12px;
-  left: 12px;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 100;
-  background: rgba(30,0,60,0.85);
-  border: 1px solid #f0f6;
-  border-radius: 10px;
-  color: #f0f;
+  color: rgba(255,255,255,0.35);
   font-family: 'Orbitron', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 8px 12px;
-  cursor: pointer;
+  font-size: 9px;
   letter-spacing: 1px;
-  box-shadow: 0 0 10px #f0f4;
+  pointer-events: none;
 }
-body.fullscreen #hud-btn { display: block; }
+body.fullscreen #swipe-hint { display: block; }
   </style>
 </head>
 <body>
@@ -443,7 +442,7 @@ body.fullscreen #hud-btn { display: block; }
   </div>
 </div>
 
-<button id="hud-btn">☰ MENU</button>
+<div id="swipe-hint">▲ swipe up for menu</div>
 
 <!-- GAME SCREEN -->
 <div id="screen-game" class="screen hidden">
@@ -800,13 +799,29 @@ document.getElementById('play-button').addEventListener('click', () => {
   setTimeout(() => { overlay.style.display = 'none'; }, 600);
 });
 
-// ===== HUD MENU BUTTON (during fullscreen gameplay) =====
-document.getElementById('hud-btn').addEventListener('click', () => {
+// ===== SWIPE UP TO OPEN MENU (during fullscreen gameplay) =====
+let touchStartY = 0;
+document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (!document.body.classList.contains('fullscreen')) return;
+  const diff = touchStartY - e.changedTouches[0].clientY;
+  if (diff > 60) openOverlay();  // swipe up 60px+
+}, { passive: true });
+
+function openOverlay() {
   const overlay = document.getElementById('ui-overlay');
   overlay.style.display = '';
   overlay.classList.remove('hidden');
   document.body.classList.remove('fullscreen');
-});
+}
+
+// ===== GAME OVER HOOK =====
+window.onGameOver = function() {
+  setTimeout(() => {
+    if (selectedGameId) selectGame(selectedGameId);
+  }, 1500);
+};
+
 
 // ===== BACK BUTTONS =====
 document.getElementById('pregame-back').addEventListener('click', () => {

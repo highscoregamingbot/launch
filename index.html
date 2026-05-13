@@ -519,6 +519,25 @@ const GAMES = {
       companyName: "Highscore Gaming",
       productName: "Chart Retard",
       productVersion: "1.0",
+    },
+    gameConfig: {
+      startprice:      0.001,
+      volatility:      0.028,
+      trendstrength:   0.45,
+      candleinterval:  5,
+      budget:          1000,
+      supply:          10000000,
+      honeypotchance:  0.10,
+      gamespeed:       4,
+      eventmin:        12,
+      eventmax:        28,
+      honeypotfudmin:  20,
+      honeypotfudmax:  30,
+      honeypotdevmin:  15,
+      honeypotdevmax:  35,
+      drainergrace:    60,
+      drainerscale:    240,
+      drainerchance:   0.03,
     }
   },
   highscore_heroes: {
@@ -550,6 +569,8 @@ if (gameConfig) {
   playButtonContainer.style.display = "block";
   playButton.disabled = true;
   playButton.textContent = "⏳ Loading...";
+
+  if (gameConfig.gameConfig) window.GAME_CONFIG = gameConfig.gameConfig;
 
   var script = document.createElement("script");
   script.src = gameConfig.loaderUrl;

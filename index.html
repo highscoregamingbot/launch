@@ -392,6 +392,18 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
   max-width: 80vw; max-height: 30vh;
   object-fit: contain; margin-bottom: 16px;
 }
+#start-text {
+  font-family: sans-serif;
+  font-size: 13px;
+  color: #00f0ff;
+  text-shadow: 0 0 6px #00f0ff44;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 320px;
+  padding: 0 16px;
+}
+#start-text a { color: #f0f; font-weight: bold; text-decoration: none; }
+#start-text a:hover { text-decoration: underline; }
 
 #play-button-container {
   height: 70px;
@@ -448,11 +460,6 @@ body.fullscreen #swipe-zone { display: flex; }
   <div id="home-header">
     <img src="logo.png" id="home-logo" alt="Highscore Gaming" onerror="this.style.display='none'">
     <div id="home-subtitle">CHOOSE YOUR GAME</div>
-    <p id="home-text">
-      Compete on our leaderboards and join exciting challenges with real crypto rewards!
-      Hold tokens, climb the ranks, and win HSC tokens or Solana. Every game could be your lucky break!<br>
-      👉 <a href="https://t.me/highscoresol" target="_blank">Join our Telegram</a>
-    </p>
   </div>
   <div id="game-grid"></div>
 </div>
@@ -501,6 +508,14 @@ body.fullscreen #swipe-zone { display: flex; }
     </div>
     <div id="game-start-screen">
       <img src="logo.png" id="start-logo" alt="Logo" onerror="this.style.display='none'">
+      <p id="start-text">
+        Welcome to Highscore Gaming! Compete on our leaderboards and join exciting
+        challenges with real crypto rewards! Whether it's ranked competitions,
+        random prize draws, or special events - we mix it up to keep things fresh.
+        Hold tokens, climb the ranks, and win HSC tokens or Solana. Every game
+        could be your lucky break!<br><br>
+        👉 <a href="https://t.me/highscoresol" target="_blank">Join our Telegram</a>
+      </p>
     </div>
     <div id="play-button-container">
       <button id="play-button" disabled>⏳ Loading...</button>
@@ -844,12 +859,11 @@ swipeZone.addEventListener('mouseup', e => {
   if (dragStartY - e.clientY > 30) openOverlay();
 });
 
-// Klik op swipe zone opent ook menu (voor als swipe moeilijk is)
-swipeZone.addEventListener('click', openOverlay);
 
 function openOverlay() {
   const overlay = document.getElementById('ui-overlay');
-  document.body.classList.remove('fullscreen'); // CSS regel weg zodat inline style de baas is
+  document.body.classList.remove('fullscreen');
+  overlay.classList.remove('hidden'); // anders trekt .hidden { transform } hem terug omlaag
   overlay.style.display = '';
   overlay.style.transition = 'none';
   overlay.style.transform = 'translateY(100%)';

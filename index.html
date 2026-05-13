@@ -442,6 +442,7 @@ body.fullscreen .ui-overlay { transform: translateY(100%); }
   cursor: n-resize;
 }
 body.fullscreen #swipe-zone { display: flex; }
+#swipe-zone { height: 28px; }
 
 #swipe-hint-text {
   color: rgba(255,255,255,0.3);
@@ -855,8 +856,10 @@ swipeZone.addEventListener('touchend', e => {
 }, { passive: true });
 
 swipeZone.addEventListener('mousedown', e => { dragStartY = e.clientY; });
-swipeZone.addEventListener('mouseup', e => {
-  if (dragStartY - e.clientY > 30) openOverlay();
+document.addEventListener('mouseup', e => {
+  if (!document.body.classList.contains('fullscreen')) return;
+  if (dragStartY && dragStartY - e.clientY > 30) openOverlay();
+  dragStartY = 0;
 });
 
 

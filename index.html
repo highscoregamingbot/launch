@@ -417,20 +417,28 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 body.fullscreen .ui-overlay { transform: translateY(100%); }
 
-#swipe-hint {
+#swipe-zone {
   display: none;
   position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  color: rgba(255,255,255,0.35);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  cursor: n-resize;
+}
+body.fullscreen #swipe-zone { display: flex; }
+
+#swipe-hint-text {
+  color: rgba(255,255,255,0.3);
   font-family: 'Orbitron', sans-serif;
   font-size: 9px;
   letter-spacing: 1px;
   pointer-events: none;
+  user-select: none;
 }
-body.fullscreen #swipe-hint { display: block; }
   </style>
 </head>
 <body>
@@ -464,7 +472,9 @@ body.fullscreen #swipe-hint { display: block; }
   </div>
 </div>
 
-<div id="swipe-hint">▲ swipe up for menu</div>
+<div id="swipe-zone">
+  <span id="swipe-hint-text">▲ swipe up for menu</span>
+</div>
 
 <!-- GAME SCREEN -->
 <div id="screen-game" class="screen hidden">
@@ -820,28 +830,32 @@ document.getElementById('play-button').addEventListener('click', () => {
   setTimeout(() => { overlay.style.display = 'none'; }, 600);
 });
 
-// ===== SWIPE/DRAG UP TO OPEN MENU (touch + mouse) =====
+// ===== SWIPE ZONE boven Unity canvas =====
+const swipeZone = document.getElementById('swipe-zone');
 let dragStartY = 0;
 
-document.addEventListener('touchstart', e => { dragStartY = e.touches[0].clientY; }, { passive: true });
-document.addEventListener('touchend', e => {
-  if (!document.body.classList.contains('fullscreen')) return;
-  if (dragStartY - e.changedTouches[0].clientY > 60) openOverlay();
+swipeZone.addEventListener('touchstart', e => { dragStartY = e.touches[0].clientY; }, { passive: true });
+swipeZone.addEventListener('touchend', e => {
+  if (dragStartY - e.changedTouches[0].clientY > 30) openOverlay();
 }, { passive: true });
 
-document.addEventListener('mousedown', e => { dragStartY = e.clientY; });
-document.addEventListener('mouseup', e => {
-  if (!document.body.classList.contains('fullscreen')) return;
-  if (dragStartY - e.clientY > 60) openOverlay();
+swipeZone.addEventListener('mousedown', e => { dragStartY = e.clientY; });
+swipeZone.addEventListener('mouseup', e => {
+  if (dragStartY - e.clientY > 30) openOverlay();
 });
+
+// Klik op swipe zone opent ook menu (voor als swipe moeilijk is)
+swipeZone.addEventListener('click', openOverlay);
 
 function openOverlay() {
   const overlay = document.getElementById('ui-overlay');
+  document.body.classList.remove('fullscreen'); // CSS regel weg zodat inline style de baas is
   overlay.style.display = '';
+  overlay.style.transition = 'none';
   overlay.style.transform = 'translateY(100%)';
-  overlay.offsetHeight; // force reflow zodat de startpositie gezet is
-  overlay.style.transform = '';
-  document.body.classList.remove('fullscreen');
+  overlay.offsetHeight; // force reflow
+  overlay.style.transition = '';
+  overlay.style.transform = ''; // slide omhoog
 }
 
 // ===== GAME OVER HOOK =====

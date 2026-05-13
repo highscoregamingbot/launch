@@ -1,86 +1,323 @@
 <!DOCTYPE html>
-
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-     /* --- IMPORT --- */
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Highscore Gaming</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-/* --- BODY --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  margin: 0;
   font-family: 'Orbitron', sans-serif;
   background: radial-gradient(ellipse at top, #1a001a 0%, #0a0010 100%);
   color: #fff;
-  overflow: hidden;
   height: 100vh;
+  overflow: hidden;
 }
 
-/* --- FULLSCREEN CANVAS --- */
-#unity-container {
+html, body { height: 100%; width: 100%; overflow: hidden; }
+
+/* ===== SCREENS ===== */
+.screen {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.screen.hidden { display: none !important; }
+
+/* ===== HOME SCREEN ===== */
+#screen-home { overflow: hidden; }
+
+#home-header {
+  padding: 14px 16px 10px;
+  text-align: center;
+  background: rgba(0,0,0,0.5);
+  border-bottom: 1px solid #f0f4;
+  flex-shrink: 0;
+}
+
+#home-logo {
+  height: 44px;
+  object-fit: contain;
+  margin-bottom: 4px;
+  display: block;
+  margin: 0 auto 4px;
+}
+
+#home-subtitle {
+  font-size: 10px;
+  color: #f0f8;
+  letter-spacing: 2px;
+}
+
+#game-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.game-card {
+  background: rgba(40, 0, 80, 0.7);
+  border: 1px solid #f0f4;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+
+.game-card:active { transform: scale(0.96); }
+.game-card:hover { box-shadow: 0 0 16px #f0f5; border-color: #f0f9; }
+
+.game-card-thumb {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  display: block;
+  background: #1a001a;
+}
+
+.game-card-thumb-fallback {
+  width: 100%;
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  background: linear-gradient(135deg, #1a001a, #2a0050);
+}
+
+.game-card-title {
+  padding: 7px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 6px #f0f5;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.play-badge {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  background: linear-gradient(135deg, #f0f, #a0f);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  box-shadow: 0 0 8px #f0f8;
+  letter-spacing: 1px;
+}
+
+/* ===== PRE-GAME SCREEN ===== */
+#screen-pregame { background: rgba(10, 0, 20, 0.98); }
+
+#pregame-back {
+  padding: 13px 16px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #f0f;
+  background: rgba(0,0,0,0.5);
+  border-bottom: 1px solid #f0f3;
+  flex-shrink: 0;
+  letter-spacing: 1px;
+}
+#pregame-back:hover { color: #fff; }
+
+#pregame-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 14px 24px;
+  gap: 14px;
+}
+
+#pregame-thumb {
+  width: 100%;
+  max-width: 380px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #f0f4;
+  box-shadow: 0 0 20px #f0f3;
+}
+#pregame-thumb img { width: 100%; display: block; }
+
+#pregame-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 0 10px #f0f;
+  letter-spacing: 1px;
+}
+
+#pregame-rank-box {
+  background: rgba(40, 0, 80, 0.6);
+  border: 1px solid #f0f4;
+  border-radius: 12px;
+  padding: 12px 20px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+#pregame-rank-label {
+  font-size: 10px;
+  color: #f0f8;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+#pregame-rank-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #00f0ff;
+  text-shadow: 0 0 10px #00f0ff;
+}
+
+#pregame-top3 {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.pregame-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(40,0,80,0.5);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.pregame-entry .pe-rank { width: 26px; flex-shrink: 0; text-align: center; font-size: 18px; }
+.pregame-entry .pe-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pregame-entry .pe-score { color: #00f0ff; font-weight: 700; flex-shrink: 0; font-size: 12px; }
+
+#pregame-play-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 14px 0;
+  color: #fff;
+  background: linear-gradient(135deg, #f0f, #a0f);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 0 24px #f0f8;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  letter-spacing: 1px;
+  width: 100%;
+  max-width: 380px;
+}
+#pregame-play-btn:hover { transform: scale(1.03); box-shadow: 0 0 32px #f0fb; }
+
+/* ===== GAME SCREEN ===== */
+#screen-game { overflow: hidden; }
+
+#unity-container {
+  position: absolute;
+  inset: 0;
   background: #111;
   z-index: 0;
 }
 #unity-canvas {
-  width: 100%;
-  height: 100%;
-  background: #222;
-  display: block;
-  border: none;
+  width: 100%; height: 100%;
+  display: block; background: #222; border: none;
 }
 
-/* --- UI OVERLAY --- */
 .ui-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 10;
   display: flex;
   flex-direction: column;
-  height: 100vh;
   background: rgba(30, 0, 60, 0.6);
   backdrop-filter: blur(8px);
+  transition: transform 0.4s ease;
 }
-.ui-overlay.hidden {
-  transform: translateY(100%);
-}
+.ui-overlay.hidden { transform: translateY(100%); }
 
-/* --- HEADER / TABS --- */
 .tabs {
   height: 50px;
   flex-shrink: 0;
   display: flex;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.6);
+  align-items: center;
+  background: rgba(0,0,0,0.6);
   border-bottom: 2px solid #222;
 }
-.tab {
-  padding: 12px 20px;
+
+.tab-back {
+  padding: 0 14px;
+  height: 100%;
+  display: flex;
+  align-items: center;
   cursor: pointer;
-  font-size: 16px;
+  color: #f0f;
+  font-size: 20px;
+  border-right: 1px solid #f0f3;
+  flex-shrink: 0;
+}
+.tab-back:hover { color: #fff; }
+
+.tabs-list {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-list::-webkit-scrollbar { display: none; }
+
+.tab {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 13px;
   color: #f0f;
   font-weight: bold;
-  transition: all 0.3s ease;
+  white-space: nowrap;
   border-bottom: 3px solid transparent;
+  transition: all 0.2s;
 }
-.tab:hover {
-  color: #fff;
-  border-color: #f0f;
-}
-.tab.active {
-  color: #fff;
-  border-color: #f0f;
-  text-shadow: 0 0 6px #f0f;
+.tab:hover { color: #fff; border-color: #f0f4; }
+.tab.active { color: #fff; border-color: #f0f; text-shadow: 0 0 6px #f0f; }
+
+.leaderboard-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* --- LEADERBOARD --- */
+#limit-select {
+  margin: 10px auto;
+  display: block;
+  background: #111;
+  color: #f0f;
+  font-family: 'Orbitron', sans-serif;
+  border: 1px solid #f0f;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
 #leaderboard {
   width: 100%;
   max-width: 600px;
@@ -91,6 +328,7 @@ body {
   box-shadow: 0 0 25px #f0f8;
   box-sizing: border-box;
 }
+
 .entry {
   display: flex;
   align-items: center;
@@ -103,133 +341,42 @@ body {
   box-sizing: border-box;
   gap: 12px;
 }
-
-.rank-number {
-  width: 24px;
-  flex-shrink: 0;
-  text-align: center;
-}
-
+.rank-number { width: 24px; flex-shrink: 0; text-align: center; }
+.medal-emoji { font-size: 20px; line-height: 1; }
 .avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background-size: cover;
-  background-position: center;
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background-size: cover; background-position: center;
   box-shadow: 0 0 6px #f0f5;
 }
-
 .name-span {
+  flex: 1; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; padding: 0 4px;
+}
+.score-span { width: 64px; flex-shrink: 0; text-align: right; }
+.entry:nth-child(1) { color: gold; font-weight: bold; }
+.entry:nth-child(2) { color: silver; font-weight: bold; }
+.entry:nth-child(3) { color: #cd7f32; font-weight: bold; }
+.entry:nth-child(n+4) .name-span { color: #00f0ff; font-weight: bold; }
+
+#game-start-screen {
   flex: 1;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 0 4px;
-}
-
-.score-span {
-  width: 56px;
-  flex-shrink: 0;
-  text-align: right;
-}
-      
-.entry span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.entry:nth-child(1) {
-  color: gold;
-  font-weight: bold;
-}
-.entry:nth-child(2) {
-  color: silver;
-  font-weight: bold;
-}
-.entry:nth-child(3) {
-  color: #cd7f32;
-  font-weight: bold;
-}
-.entry:nth-child(n+4) .name-span {
-  color: #00f0ff;
-  font-weight: bold;
-  text-shadow: 0 0 6px #00f0ff90, 0 0 2px #00f0ff60;
-}
-
-.medal-emoji {
-  font-size: 20px;    /* Maak groter of kleiner naar wens */
-  line-height: 1;
-  margin-right: 2px;
-  vertical-align: middle;
-}
-
-/* --- SELECT DROPDOWN --- */
-#limit-select {
-  margin: 10px auto;
-  display: block;
-  background: #111;
-  color: #f0f;
-  font-family: 'Orbitron', sans-serif;
-  border: 1px solid #f0f;
-  border-radius: 8px;
-  padding: 6px 12px;
-}
-
-#start-screen {
-  flex-grow: 1;                 /* Vul alle ruimte tussen tabs en playbutton */
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px 12px;
-  #start-screen {
-  padding-top: 24px;
+  padding: 20px;
 }
-
-  text-align: center;
-}
-
 #start-logo {
-  max-width: 90vw;        /* past zich aan aan schermbreedte */
-  max-height: 40vh;       /* voorkomt afsnijding op kleine schermen */
-  object-fit: contain;    /* behoudt verhouding zonder afsnijden */
-  margin-top: 24px;
-  margin-bottom: 20px;
-  display: block;
+  max-width: 80vw; max-height: 30vh;
+  object-fit: contain; margin-bottom: 16px;
 }
 
-#start-text {
-  font-size: 18px; /* Of bijvoorbeeld 16px als je het kleiner wilt */
-  color: #00f0ff;  /* Neonblauw */
-  text-shadow: 0 0 6px #00f0ff88;
-  line-height: 1.5;
-  max-width: 600px;
-  padding: 0 12px;
-}
-
-/* Linkstijl binnen de tekst */
-#start-text a {
-  color: #f0f; /* Paars */
-  text-decoration: none;
-  font-weight: bold;
-}
-#start-text a:hover {
-  text-decoration: underline;
-}
-
-/* --- PLAY BUTTON --- */
 #play-button-container {
   height: 70px;
   flex-shrink: 0;
   padding: 12px 0;
   text-align: center;
-  width: 100%;
-  background: rgba(30, 0, 60, 0.6);
+  background: rgba(30,0,60,0.6);
 }
 #play-button {
   font-family: 'Orbitron', sans-serif;
@@ -241,519 +388,503 @@ body {
   border-radius: 10px;
   box-shadow: 0 0 20px #f0f8;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-#play-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 25px #f0fb;
-}
+#play-button:hover { transform: scale(1.05); box-shadow: 0 0 25px #f0fb; }
+#play-button:disabled { opacity: 0.7; cursor: default; transform: none; }
 
-/* --- ANIMATION SUPPORT --- */
-body.fullscreen #dummy-canvas-container {
-  z-index: 10;
-}
-body.fullscreen .ui-overlay {
-  transform: translateY(100%);
-}
-.leaderboard-scroll-container {
-  flex-grow: 1;
-  overflow-y: auto;
-  width: 100%;
-  padding: 10px 0;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+body.fullscreen .ui-overlay { transform: translateY(100%); }
+  </style>
+</head>
+<body>
 
-#leaderboard {
-  width: 100%;
-  overflow: visible;
-}
+<!-- HOME SCREEN -->
+<div id="screen-home" class="screen">
+  <div id="home-header">
+    <img src="logo.png" id="home-logo" alt="Highscore Gaming" onerror="this.style.display='none'">
+    <div id="home-subtitle">CHOOSE YOUR GAME</div>
+  </div>
+  <div id="game-grid"></div>
+</div>
 
-/* --- ANIMATION SUPPORT --- */
-body.fullscreen #dummy-canvas-container {
-  z-index: 10;
-}
-body.fullscreen .ui-overlay {
-  transform: translateY(100%);
-}
-html, body {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-}
-
-@media (orientation: landscape) {
-  .ui-overlay {
-    padding-bottom: 40px;
-  }
-}
-    </style>
-  </head>
-  <body>
-    <div id="unity-container">
-      <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+<!-- PRE-GAME SCREEN -->
+<div id="screen-pregame" class="screen hidden">
+  <div id="pregame-back">← All Games</div>
+  <div id="pregame-content">
+    <div id="pregame-thumb"><img id="pregame-thumb-img" src="" alt=""></div>
+    <div id="pregame-title"></div>
+    <div id="pregame-rank-box">
+      <div id="pregame-rank-label">YOUR RANK THIS SESSION</div>
+      <div id="pregame-rank-value">—</div>
     </div>
-    <div class="ui-overlay" id="ui-overlay">
-  <div class="tabs">
-    <div class="tab active" data-tab="leaderboard">Leaderboard</div>
-    <div class="tab" data-tab="alltime">All-time</div>
-    <div class="tab" data-tab="global">Global</div>
-    <div class="tab" data-tab="chat">Groups</div>
-  </div>
-
-  <div class="leaderboard-scroll-container" style="display: none;">
-    <select id="limit-select">
-      <option value="10">Top 10</option>
-      <option value="20">Top 20</option>
-      <option value="50">Top 50</option>
-    </select>
-    <div id="leaderboard"></div>
-  </div>
-
-<div id="start-screen">
-  <img src="logo.png" alt="Logo" id="start-logo">
-<p id="start-text">
-    Welcome to Highscore Gaming! Compete on our leaderboards and join exciting
-    challenges with real crypto rewards! Whether it's ranked competitions,
-    random prize draws, or special events - we mix it up to keep things fresh.
-    Hold tokens, climb the ranks, and win HSC tokens or Solana. Every game
-    could be your lucky break!<br>
-    👉 <a href="https://t.me/highscoresol" target="_blank">Join our Telegram</a>
-</p>
-</div>
-    
-  <div id="play-button-container" style="display: none;">
-    <button id="play-button" disabled>⏳ Game laden...</button>
+    <div id="pregame-top3"></div>
+    <button id="pregame-play-btn">▶ PLAY</button>
   </div>
 </div>
 
-    <script>
-      var canvas = document.getElementById("unity-canvas");
-      const playButton = document.getElementById("play-button");
-      const playButtonContainer = document.getElementById("play-button-container");
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen hidden">
+  <div id="unity-container">
+    <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+  </div>
+  <div class="ui-overlay" id="ui-overlay">
+    <div class="tabs">
+      <div class="tab-back" id="game-back">←</div>
+      <div class="tabs-list">
+        <div class="tab active" data-tab="leaderboard">Leaderboard</div>
+        <div class="tab" data-tab="alltime">All-time</div>
+        <div class="tab" data-tab="global">Global</div>
+        <div class="tab" data-tab="chat">Groups</div>
+      </div>
+    </div>
+    <div class="leaderboard-scroll-container" id="leaderboard-container" style="display:none">
+      <select id="limit-select">
+        <option value="10">Top 10</option>
+        <option value="20">Top 20</option>
+        <option value="50">Top 50</option>
+      </select>
+      <div id="leaderboard"></div>
+    </div>
+    <div id="game-start-screen">
+      <img src="logo.png" id="start-logo" alt="Logo" onerror="this.style.display='none'">
+    </div>
+    <div id="play-button-container">
+      <button id="play-button" disabled>⏳ Loading...</button>
+    </div>
+  </div>
+</div>
 
-// ---- 1. URL params uitlezen ----
-const urlParams = new URLSearchParams(window.location.search);
-console.log("🌐 Huidige URL:", window.location.href);
-
-console.log("🧩 urlParams.get('startapp'):", urlParams.get('startapp'));
-console.log("🧩 urlParams.get('start_param'):", urlParams.get('start_param'));
-
-if (Telegram?.WebApp?.initDataUnsafe) {
-  console.log("📦 Telegram.WebApp.initDataUnsafe:", Telegram.WebApp.initDataUnsafe);
-  console.log("📦 Telegram.WebApp.initDataUnsafe.start_param:", Telegram.WebApp.initDataUnsafe.start_param);
-} else {
-  console.warn("⚠️ Telegram.WebApp.initDataUnsafe niet beschikbaar!");
-}
-
-// ---- 2. Start parameters ophalen en decoderen als JSON (zonder URL fallback) ----
-function getStartParamData() {
-  let param = urlParams.get('startapp') || urlParams.get('start_param');
-
-  if (!param && Telegram?.WebApp?.initDataUnsafe?.start_param) {
-    param = Telegram.WebApp.initDataUnsafe.start_param;
-  }
-
-  console.log("📦 start_param binnengekomen (gebruikt):", param);
-
-  if (!param) return null;
-
-  let b64 = param.replace(/-/g, '+').replace(/_/g, '/');
-  while (b64.length % 4) b64 += '=';
-
-  try {
-    const jsonStr = atob(b64);
-    console.log("📖 start_param als JSON string:", jsonStr);
-    const parsed = JSON.parse(jsonStr);
-    console.log("✅ Parsed startData:", parsed);
-    return parsed;
-  } catch(e) {
-    console.error("❌ start_param decode/parsing error", e);
-    return null;
-  }
-}
-
-
-const startData = getStartParamData();
-console.log("📦 startData inhoud:", startData);
-
-// Haal gameId uit startData OF uit de URL path (voor directe links zoals /highscore_heroes)
-let chatId = startData?.chatId || "";
-let gameId = startData?.gameId || "";
-
-// Fallback: als geen gameId in startData, check URL path
-if (!gameId) {
-  const pathParts = window.location.pathname.split('/').filter(p => p);
-  const lastPart = pathParts[pathParts.length - 1];
-  if (lastPart && lastPart !== 'launch.html') {
-    gameId = lastPart;
-    console.log("📦 gameId from URL path:", gameId);
-  }
-}
-
-// ---- 3. Telegram user info ----
-const tgInitData = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) || {};
-const telegramId = tgInitData.user?.id || "";
-const username = tgInitData.user?.username || "";
-const firstName = tgInitData.user?.first_name || "";
-const lastName = tgInitData.user?.last_name || "";
-
-// ---- 4. Object voor Unity en API ----
-const userData = {
-  telegramId,
-  username,
-  chatId,
-  firstName,
-  lastName,
-  gameId
-};
-const unityData = `${telegramId};${username};${chatId};${firstName};${lastName};${gameId}`;
-
-// --- DEBUG (optioneel) ---
-console.log("userData", userData);
-console.log("unityData", unityData);
-
-// --- Game configuraties ---
+<script>
+// ===== GAMES CONFIG =====
 const GAMES = {
   maze_runner: {
     title: "Maze Runner",
+    thumbnail: "thumbnails/mazerunner.gif",
+    emoji: "🌀",
     loaderUrl: "/maze_runner/Build/mazerunnerhsc.loader.js",
-    config: { 
+    config: {
       dataUrl: "/maze_runner/Build/mazerunnerhsc.data",
       frameworkUrl: "/maze_runner/Build/mazerunnerhsc.framework.js",
       codeUrl: "/maze_runner/Build/mazerunnerhsc.wasm",
       streamingAssetsUrl: "/mazerunner/Build/StreamingAssets",
-      companyName: "Highscore Gaming",
-      productName: "Maze Runner",
-      productVersion: "0.1",
+      companyName: "Highscore Gaming", productName: "Maze Runner", productVersion: "0.1"
     }
   },
   ghosty: {
     title: "Ghosty",
+    thumbnail: "thumbnails/ghosty.gif",
+    emoji: "👻",
     loaderUrl: "/ghosty/Build/ghosty.loader.js",
-    config: {        
+    config: {
       dataUrl: "/ghosty/Build/ghosty.data",
       frameworkUrl: "/ghosty/Build/ghosty.framework.js",
       codeUrl: "/ghosty/Build/ghosty.wasm",
       streamingAssetsUrl: "/ghosty/Build/StreamingAssets",
-      companyName: "Highscore Gaming",
-      productName: "Ghosty",
-      productVersion: "0.1",
+      companyName: "Highscore Gaming", productName: "Ghosty", productVersion: "0.1"
     }
   },
   brickbreaker: {
     title: "Brick Breaker",
+    thumbnail: "thumbnails/brickbreaker.gif",
+    emoji: "🧱",
     loaderUrl: "/brickbreaker/Build/brickbreaker.loader.js",
-    config: {        
+    config: {
       dataUrl: "/brickbreaker/Build/brickbreaker.data",
       frameworkUrl: "/brickbreaker/Build/brickbreaker.framework.js",
       codeUrl: "/brickbreaker/Build/brickbreaker.wasm",
       streamingAssetsUrl: "/brickbreaker/Build/StreamingAssets",
-      companyName: "Highscore Gaming",
-      productName: "Brick Breaker",
-      productVersion: "0.1",
+      companyName: "Highscore Gaming", productName: "Brick Breaker", productVersion: "0.1"
     }
   },
   oldmanrush: {
     title: "Oldman Rush",
+    thumbnail: "thumbnails/oldmanrush.gif",
+    emoji: "🏃",
     loaderUrl: "/oldmanrush/Build/oldmanrush.loader.js",
-    config: {        
+    config: {
       dataUrl: "/oldmanrush/Build/oldmanrush.data",
       frameworkUrl: "/oldmanrush/Build/oldmanrush.framework.js",
       codeUrl: "/oldmanrush/Build/oldmanrush.wasm",
       streamingAssetsUrl: "/oldmanrush/Build/StreamingAssets",
-      companyName: "Highscore Gaming",
-      productName: "Oldman Rush",
-      productVersion: "0.1",
+      companyName: "Highscore Gaming", productName: "Oldman Rush", productVersion: "0.1"
     }
   },
   helixjump: {
     title: "Helix Jump 3D",
+    thumbnail: "thumbnails/helixjump.gif",
+    emoji: "🌀",
     loaderUrl: "/helixjump/Build/helixjump.loader.js",
     config: {
       dataUrl: "/helixjump/Build/helixjump.data",
       frameworkUrl: "/helixjump/Build/helixjump.framework.js",
       codeUrl: "/helixjump/Build/helixjump.wasm",
       streamingAssetsUrl: "/helixjump/Build/StreamingAssets",
-      companyName: "Highscore Gaming",
-      productName: "Helix Jump 3D",
-      productVersion: "1.0",
+      companyName: "Highscore Gaming", productName: "Helix Jump 3D", productVersion: "1.0"
     }
   },
   hopper: {
     title: "Hopper",
+    thumbnail: "thumbnails/hopper.gif",
+    emoji: "🐸",
     loaderUrl: "/hopper/Build/hopper.loader.js",
     config: {
       dataUrl: "/hopper/Build/hopper.data",
       frameworkUrl: "/hopper/Build/hopper.framework.js",
       codeUrl: "/hopper/Build/hopper.wasm",
       streamingAssetsUrl: "/hopper/Build/StreamingAssets",
-      companyName: "Highscore Gaming",
-      productName: "Hopper",
-      productVersion: "1.0",
+      companyName: "Highscore Gaming", productName: "Hopper", productVersion: "1.0"
     }
   },
   buddy: {
     title: "Buddy",
+    thumbnail: "thumbnails/buddy.gif",
+    emoji: "🤖",
     loaderUrl: "/buddy/Build/buddy.loader.js",
     config: {
       dataUrl: "/buddy/Build/buddy.data",
       frameworkUrl: "/buddy/Build/buddy.framework.js",
       codeUrl: "/buddy/Build/buddy.wasm",
       streamingAssetsUrl: "/buddy/Build/StreamingAssets",
-      companyName: "Highscore Gaming",
-      productName: "Buddy",
-      productVersion: "1.0",
+      companyName: "Highscore Gaming", productName: "Buddy", productVersion: "1.0"
     }
   },
   chartretard: {
     title: "Chart Retard",
+    thumbnail: "thumbnails/chartretard.gif",
+    emoji: "📈",
     loaderUrl: "/chartretard/Build/chartretard.loader.js",
     config: {
       dataUrl: "/chartretard/Build/chartretard.data",
       frameworkUrl: "/chartretard/Build/chartretard.framework.js",
       codeUrl: "/chartretard/Build/chartretard.wasm",
       streamingAssetsUrl: "/chartretard/Build/StreamingAssets",
-      companyName: "Highscore Gaming",
-      productName: "Chart Retard",
-      productVersion: "1.0",
+      companyName: "Highscore Gaming", productName: "Chart Retard", productVersion: "1.0"
     },
     gameConfig: {
-      startprice:      0.001,
-      volatility:      0.028,
-      trendstrength:   0.45,
-      candleinterval:  5,
-      budget:          1000,
-      supply:          10000000,
-      honeypotchance:  0.10,
-      gamespeed:       4,
-      eventmin:        12,
-      eventmax:        28,
-      honeypotfudmin:  20,
-      honeypotfudmax:  30,
-      honeypotdevmin:  15,
-      honeypotdevmax:  35,
-      drainergrace:    60,
-      drainerscale:    240,
-      drainerchance:   0.03,
+      startprice: 0.001, volatility: 0.028, trendstrength: 0.45,
+      candleinterval: 5, budget: 1000, supply: 10000000,
+      honeypotchance: 0.10, gamespeed: 4, eventmin: 12, eventmax: 28,
+      honeypotfudmin: 20, honeypotfudmax: 30, honeypotdevmin: 15, honeypotdevmax: 35,
+      drainergrace: 60, drainerscale: 240, drainerchance: 0.03
     }
   },
   highscore_heroes: {
     title: "Highscore Heroes",
+    thumbnail: "thumbnails/highscoreheroes.gif",
+    emoji: "🏆",
     loaderUrl: "/highscoreheroes/Build/highscoreheroes.loader.js",
     config: {
       dataUrl: "/highscoreheroes/Build/highscoreheroes.data",
       frameworkUrl: "/highscoreheroes/Build/highscoreheroes.framework.js",
       codeUrl: "/highscoreheroes/Build/highscoreheroes.wasm",
       streamingAssetsUrl: "/highscoreheroes/Build/StreamingAssets",
-      companyName: "Highscore Gaming",
-      productName: "Highscore Heroes",
-      productVersion: "1.0",
+      companyName: "Highscore Gaming", productName: "Highscore Heroes", productVersion: "1.0"
     }
-  },
+  }
 };
 
-      // ---- Unity direct laden bij paginalaad ----
-      // Zet de playknop direct zichtbaar maar disabled, tekst "⏳ Loading..."
-playButtonContainer.style.display = "block";
-playButton.disabled = true;
-playButton.textContent = "⏳ Loading...";
-      
-console.log("✅ Ontvangen gameId:", gameId);
+// ===== TELEGRAM / URL PARAMS =====
+const urlParams = new URLSearchParams(window.location.search);
+const tg = window.Telegram?.WebApp;
+const tgUser = tg?.initDataUnsafe?.user || {};
 
-const gameConfig = GAMES[gameId];
+const telegramId = tgUser.id || "";
+const username   = tgUser.username || "";
+const firstName  = tgUser.first_name || "";
+const lastName   = tgUser.last_name || "";
 
-if (gameConfig) {
-  playButtonContainer.style.display = "block";
-  playButton.disabled = true;
-  playButton.textContent = "⏳ Loading...";
-
-  if (gameConfig.gameConfig) window.GAME_CONFIG = gameConfig.gameConfig;
-
-  var script = document.createElement("script");
-  script.src = gameConfig.loaderUrl;
-  script.onload = () => {
-    console.log("✅ Unity loader geladen:", script.src);
-    createUnityInstance(canvas, gameConfig.config, (progress) => {
-      // evt. loading visuals
-    }).then((unityInstance) => {
-      unityInstance.SendMessage("TelegramParams", "SetTelegramUserData", unityData);
-
-      playButton.textContent = "⏳ Game starting...";
-      setTimeout(() => {
-        playButton.disabled = false;
-        playButton.textContent = "▶️ Play";
-        isLoaded = true;
-      }, 2500);
-    });
-  };
-  document.body.appendChild(script);
-} else {
-  playButtonContainer.style.display = "none";
-  alert("Deze game bestaat niet!");
+function getStartParamData() {
+  let param = urlParams.get('startapp') || urlParams.get('start_param');
+  if (!param && tg?.initDataUnsafe?.start_param) param = tg.initDataUnsafe.start_param;
+  if (!param) return null;
+  let b64 = param.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  try { return JSON.parse(atob(b64)); } catch(e) { return null; }
 }
 
-      // ---- Einde Unity direct laden ----
+const startData = getStartParamData();
+let chatId = startData?.chatId || "";
+let selectedGameId = startData?.gameId || "";
 
-      window.addEventListener('resize', function() {
-        // Optioneel: canvas herstr.
-        // (Alleen als je dat wilt na Play)
-      });
-const lb = document.getElementById("leaderboard");
-const tabs = document.querySelectorAll(".tab");
-const limitSelect = document.getElementById("limit-select");
-const overlay = document.getElementById("ui-overlay");
+// ===== UTILITIES =====
 const baseURL = "https://highscoregamingbot.pythonanywhere.com";
 
-let limit = 10;
+function formatScore(n) {
+  n = Number(n) || 0;
+  const abs = Math.abs(n);
+  if (abs >= 1e9) return (n / 1e9).toFixed(1) + "B";
+  if (abs >= 1e6) return (n / 1e6).toFixed(1) + "M";
+  if (abs >= 1e3) return Math.round(n / 1e3) + "K";
+  return String(n);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// ===== HOME SCREEN =====
+function buildHomeScreen() {
+  const grid = document.getElementById('game-grid');
+  grid.innerHTML = '';
+  Object.entries(GAMES).forEach(([id, game]) => {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    card.innerHTML = `
+      <div class="play-badge">PLAY</div>
+      <img class="game-card-thumb" src="${game.thumbnail}" alt="${game.title}"
+           onerror="this.outerHTML='<div class=\\'game-card-thumb-fallback\\'>${game.emoji}</div>'">
+      <div class="game-card-title">${game.title}</div>
+    `;
+    card.addEventListener('click', () => selectGame(id));
+    grid.appendChild(card);
+  });
+}
+
+// ===== SELECT GAME → PRE-GAME SCREEN =====
+function selectGame(gameId) {
+  selectedGameId = gameId;
+  const game = GAMES[gameId];
+  if (!game) return;
+
+  document.getElementById('pregame-title').textContent = game.title;
+  document.getElementById('pregame-thumb-img').src = game.thumbnail;
+  document.getElementById('pregame-rank-value').textContent = '—';
+  document.getElementById('pregame-top3').innerHTML =
+    '<div style="color:#f0f8;font-size:11px;text-align:center;letter-spacing:1px">Loading rankings...</div>';
+
+  showScreen('screen-pregame');
+  loadPregameData(gameId);
+}
+
+async function loadPregameData(gameId) {
+  const rankEl = document.getElementById('pregame-rank-value');
+  const top3El = document.getElementById('pregame-top3');
+
+  try {
+    const endpoint = chatId
+      ? `${baseURL}/leaderboard?game_id=${gameId}&chat_id=${chatId}&limit=50`
+      : `${baseURL}/global_alltime_leaderboard?game_id=${gameId}&limit=10`;
+
+    const res = await fetch(endpoint);
+    const data = await res.json();
+    const scores = (data.scores || []).filter(e => {
+      const name = [e.first_name, e.last_name].filter(Boolean).join(' ').trim() || e.username || '';
+      return name && name !== '—' && isNaN(name);
+    });
+
+    // Find user's own rank
+    const myIdx = telegramId
+      ? scores.findIndex(e => String(e.telegram_id) === String(telegramId))
+      : -1;
+
+    if (myIdx >= 0) {
+      rankEl.textContent = `#${myIdx + 1}`;
+      rankEl.style.color = '#00f0ff';
+    } else {
+      rankEl.textContent = 'Not ranked yet';
+      rankEl.style.color = '#f0f8';
+      rankEl.style.fontSize = '14px';
+    }
+
+    // Top 3
+    const medals = ['🥇', '🥈', '🥉'];
+    const top3 = scores.slice(0, 3);
+    if (top3.length === 0) {
+      top3El.innerHTML = '<div style="color:#f0f8;font-size:11px;text-align:center">No scores yet — be first!</div>';
+      return;
+    }
+    top3El.innerHTML = top3.map((e, i) => {
+      const name = [e.first_name, e.last_name].filter(Boolean).join(' ') || e.username || '—';
+      return `<div class="pregame-entry">
+        <span class="pe-rank">${medals[i]}</span>
+        <span class="pe-name">${name}</span>
+        <span class="pe-score">${formatScore(e.score ?? e.points ?? 0)}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    rankEl.textContent = '—';
+    top3El.innerHTML = '<div style="color:#f0f8;font-size:11px;text-align:center">Could not load rankings</div>';
+  }
+}
+
+// ===== PRE-GAME → GAME =====
+let unityInstance = null;
 let isLoaded = false;
+let loadedGameId = null;
+
+document.getElementById('pregame-play-btn').addEventListener('click', () => {
+  // If a different game is already loaded, reload the page for the new game
+  if (loadedGameId && loadedGameId !== selectedGameId) {
+    const payload = JSON.stringify({ gameId: selectedGameId, chatId: chatId });
+    const b64 = btoa(payload).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    window.location.href = 'index.html?startapp=' + b64;
+    return;
+  }
+  showScreen('screen-game');
+  if (!loadedGameId) loadUnityGame(selectedGameId);
+});
+
+function loadUnityGame(gameId) {
+  loadedGameId = gameId;
+  const game = GAMES[gameId];
+  if (!game) return;
+
+  const canvas = document.getElementById('unity-canvas');
+  const playBtn = document.getElementById('play-button');
+  const unityData = `${telegramId};${username};${chatId};${firstName};${lastName};${gameId}`;
+
+  if (game.gameConfig) window.GAME_CONFIG = game.gameConfig;
+
+  playBtn.disabled = true;
+  playBtn.textContent = '⏳ Loading...';
+
+  const script = document.createElement('script');
+  script.src = game.loaderUrl;
+  script.onload = () => {
+    createUnityInstance(canvas, game.config, () => {})
+      .then(instance => {
+        unityInstance = instance;
+        instance.SendMessage("TelegramParams", "SetTelegramUserData", unityData);
+        playBtn.textContent = '⏳ Game starting...';
+        setTimeout(() => {
+          playBtn.disabled = false;
+          playBtn.textContent = '▶️ Play';
+          isLoaded = true;
+        }, 2500);
+      })
+      .catch(err => {
+        playBtn.textContent = '❌ ' + err;
+        playBtn.disabled = false;
+      });
+  };
+  document.body.appendChild(script);
+}
+
+// ===== PLAY BUTTON =====
+document.getElementById('play-button').addEventListener('click', () => {
+  if (!isLoaded) return;
+  const overlay = document.getElementById('ui-overlay');
+  overlay.classList.add('hidden');
+  document.body.classList.add('fullscreen');
+  setTimeout(() => { overlay.style.display = 'none'; }, 600);
+});
+
+// ===== BACK BUTTONS =====
+document.getElementById('pregame-back').addEventListener('click', () => {
+  showScreen('screen-home');
+});
+
+document.getElementById('game-back').addEventListener('click', () => {
+  // Restore overlay for when user comes back to game screen
+  const overlay = document.getElementById('ui-overlay');
+  overlay.style.display = '';
+  overlay.classList.remove('hidden');
+  document.body.classList.remove('fullscreen');
+  showScreen('screen-home');
+});
+
+// ===== LEADERBOARD =====
+const lbEl = document.getElementById('leaderboard');
+const lbContainer = document.getElementById('leaderboard-container');
+const limitSelect = document.getElementById('limit-select');
+let limit = 10;
+let activeTab = 'leaderboard';
 
 function buildEndpoints() {
   return {
-    leaderboard: `/leaderboard?game_id=${gameId}&chat_id=${chatId}&limit=${limit}`,
-    alltime: `/alltime_leaderboard?game_id=${gameId}&chat_id=${chatId}&limit=${limit}`,
-    global: `/global_alltime_leaderboard?game_id=${gameId}&limit=${limit}`,
-    chat: `/alltime_chat_leaderboard?game_id=${gameId}&limit=${limit}`
+    leaderboard: `/leaderboard?game_id=${selectedGameId}&chat_id=${chatId}&limit=${limit}`,
+    alltime:     `/alltime_leaderboard?game_id=${selectedGameId}&chat_id=${chatId}&limit=${limit}`,
+    global:      `/global_alltime_leaderboard?game_id=${selectedGameId}&limit=${limit}`,
+    chat:        `/alltime_chat_leaderboard?game_id=${selectedGameId}&limit=${limit}`
   };
 }
 
 function loadLeaderboard(tabKey) {
-  lb.innerHTML = "Loading...";
+  activeTab = tabKey;
+  lbEl.innerHTML = 'Loading...';
   const endpoints = buildEndpoints();
 
   fetch(baseURL + endpoints[tabKey])
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
+    .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
     .then(data => {
-      console.log("DEBUG Leaderboard API response:", data);
       const scores = (data.scores || []).filter(entry => {
-        const name = [entry.first_name, entry.last_name].filter(Boolean).join(" ").trim() || entry.chat_title || "";
-        return name !== "" && isNaN(name) && name !== "—";
+        const name = [entry.first_name, entry.last_name].filter(Boolean).join(' ').trim() || entry.chat_title || '';
+        return name && isNaN(name) && name !== '—';
       });
-      lb.innerHTML = "";
-
-      if (scores.length === 0) {
-        lb.textContent = "No scores yet!";
-        return;
-      }
+      lbEl.innerHTML = '';
+      if (scores.length === 0) { lbEl.textContent = 'No scores yet!'; return; }
 
       scores.forEach((entry, index) => {
-        const div = document.createElement("div");
-        div.className = "entry";
-
+        const div = document.createElement('div');
+        div.className = 'entry';
         const rank = index + 1;
 
-        // 🔢 Plek met eventueel medaille
-        const rankSpan = document.createElement("span");
-        rankSpan.className = "rank-number";
-        if (rank === 1) {
-          rankSpan.innerHTML = '<span class="medal-emoji">🥇</span>';
-        } else if (rank === 2) {
-          rankSpan.innerHTML = '<span class="medal-emoji">🥈</span>';
-        } else if (rank === 3) {
-          rankSpan.innerHTML = '<span class="medal-emoji">🥉</span>';
+        const rankSpan = document.createElement('span');
+        rankSpan.className = 'rank-number';
+        if (rank <= 3) {
+          rankSpan.innerHTML = `<span class="medal-emoji">${['🥇','🥈','🥉'][rank-1]}</span>`;
         } else {
           rankSpan.textContent = rank.toString();
         }
 
-
-
-        // 👤 Naam + avatar
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "name-span";
-        nameSpan.textContent = [entry.first_name, entry.last_name].filter(Boolean).join(" ") || entry.username || entry.chat_title || "—";
-
-        const avatar = document.createElement("div");
-        avatar.className = "avatar";
-
-        if (tabKey === "chat" && entry.chat_title && !/^\d+$/.test(entry.chat_title)) {
-          avatar.style.backgroundImage = `url('https://highscoregamingbot.pythonanywhere.com/group_avatar/${entry.chat_id}')`;
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        if (tabKey === 'chat' && entry.chat_title && !/^\d+$/.test(entry.chat_title)) {
+          avatar.style.backgroundImage = `url('${baseURL}/group_avatar/${entry.chat_id}')`;
         } else if (entry.username) {
           avatar.style.backgroundImage = `url('https://t.me/i/userpic/320/${entry.username}.jpg')`;
         } else {
-          avatar.textContent = (entry.first_name || "?")[0];
-          avatar.style.background = "#444";
-          avatar.style.color = "#f0f";
-          avatar.style.textAlign = "center";
-          avatar.style.lineHeight = "32px";
+          avatar.textContent = (entry.first_name || '?')[0];
+          avatar.style.cssText += ';background:#444;color:#f0f;text-align:center;line-height:32px;font-size:14px';
         }
-        avatar.style.backgroundSize = "cover";
-        avatar.style.backgroundPosition = "center";
+        avatar.style.backgroundSize = 'cover';
+        avatar.style.backgroundPosition = 'center';
 
-        // 💯 Score
-        const scoreSpan = document.createElement("span");
-        scoreSpan.className = "score-span"; // <-- HIER toevoegen!
-        scoreSpan.textContent = `${entry.score ?? entry.points ?? 0}`;
-        
-        // Voeg alles toe aan 
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'name-span';
+        nameSpan.textContent = [entry.first_name, entry.last_name].filter(Boolean).join(' ')
+          || entry.username || entry.chat_title || '—';
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'score-span';
+        scoreSpan.textContent = formatScore(entry.score ?? entry.points ?? 0);
+
         div.appendChild(rankSpan);
         div.appendChild(avatar);
         div.appendChild(nameSpan);
         div.appendChild(scoreSpan);
-
-        lb.appendChild(div);
+        lbEl.appendChild(div);
       });
-
-      // Scroll expliciet naar de play-button als hij buiten beeld is
-      setTimeout(() => {
-        playButton.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 300);
     })
-    .catch(err => {
-      lb.textContent = "❌ Fout bij laden";
-      console.error("Fetch error:", err);
-    });
+    .catch(() => { lbEl.textContent = '❌ Failed to load'; });
 }
 
-// Tabs klikken
-tabs.forEach(btn => {
-  btn.addEventListener("click", () => {
-    // ✅ Verberg start-scherm bij tab-click
-    document.getElementById("start-screen").style.display = "none";
-    document.querySelector(".leaderboard-scroll-container").style.display = "flex";
-    document.querySelector(".tab.active")?.classList.remove("active");
-    btn.classList.add("active");
-
-    lb.classList.add("fade-out");
-    setTimeout(() => {
-      loadLeaderboard(btn.dataset.tab);
-      lb.classList.remove("fade-out");
-    }, 300);
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('game-start-screen').style.display = 'none';
+    lbContainer.style.display = 'flex';
+    document.querySelector('.tab.active')?.classList.remove('active');
+    btn.classList.add('active');
+    loadLeaderboard(btn.dataset.tab);
   });
 });
 
-// Selectie wijzigen
-limitSelect.addEventListener("change", e => {
+limitSelect.addEventListener('change', e => {
   limit = parseInt(e.target.value);
-  const activeTab = document.querySelector(".tab.active")?.dataset.tab || "leaderboard";
   loadLeaderboard(activeTab);
 });
 
-playButton.addEventListener("click", () => {
-  if (!isLoaded) return;
+// ===== INIT =====
+buildHomeScreen();
 
-  // ✅ Verberg overlay en startscherm
-  overlay.classList.add("hidden");
-  document.getElementById("start-screen").style.display = "none";
-
-  document.body.classList.add("fullscreen");
-  var unityContainer = document.getElementById("unity-container");
-  unityContainer.style.position = "fixed";
-  unityContainer.style.top = "0";
-  unityContainer.style.left = "0";
-  unityContainer.style.width = "100vw";
-  unityContainer.style.height = "100vh";
-  canvas.style.width = "100vw";
-  canvas.style.height = "100vh";
-
-  setTimeout(() => {
-    overlay.style.display = "none";
-  }, 600);
-});
-    </script>
-  </body>
+if (selectedGameId && GAMES[selectedGameId]) {
+  // Launched from Telegram with startapp → go straight to game screen and load Unity
+  showScreen('screen-game');
+  loadUnityGame(selectedGameId);
+} else {
+  showScreen('screen-home');
+}
+</script>
+</body>
 </html>

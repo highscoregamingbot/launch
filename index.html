@@ -493,7 +493,7 @@ body.fullscreen #swipe-zone { display: flex; }
     <div class="tabs">
       <div class="tab-back" id="game-back">←</div>
       <div class="tabs-list">
-        <div class="tab active" data-tab="leaderboard">Leaderboard</div>
+        <div class="tab active" data-tab="leaderboard">Live</div>
         <div class="tab" data-tab="alltime">All-time</div>
         <div class="tab" data-tab="global">Global</div>
         <div class="tab" data-tab="chat">Groups</div>
@@ -850,6 +850,7 @@ document.getElementById('play-button').addEventListener('click', () => {
 const swipeZone = document.getElementById('swipe-zone');
 let dragStartY = 0;
 
+// Swipe omhoog → menu openen
 swipeZone.addEventListener('touchstart', e => { dragStartY = e.touches[0].clientY; }, { passive: true });
 swipeZone.addEventListener('touchend', e => {
   if (dragStartY - e.changedTouches[0].clientY > 30) openOverlay();
@@ -861,6 +862,27 @@ document.addEventListener('mouseup', e => {
   if (dragStartY && dragStartY - e.clientY > 30) openOverlay();
   dragStartY = 0;
 });
+
+// Swipe omlaag op overlay → menu sluiten
+const overlay = document.getElementById('ui-overlay');
+let overlayDragStartY = 0;
+
+overlay.addEventListener('touchstart', e => { overlayDragStartY = e.touches[0].clientY; }, { passive: true });
+overlay.addEventListener('touchend', e => {
+  if (e.changedTouches[0].clientY - overlayDragStartY > 60) closeOverlay();
+}, { passive: true });
+
+overlay.addEventListener('mousedown', e => { overlayDragStartY = e.clientY; });
+overlay.addEventListener('mouseup', e => {
+  if (e.clientY - overlayDragStartY > 60) closeOverlay();
+});
+
+function closeOverlay() {
+  const overlay = document.getElementById('ui-overlay');
+  overlay.classList.add('hidden');
+  document.body.classList.add('fullscreen');
+  setTimeout(() => { overlay.style.display = 'none'; }, 400);
+}
 
 
 function openOverlay() {

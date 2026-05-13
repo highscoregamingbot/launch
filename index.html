@@ -798,14 +798,20 @@ document.getElementById('play-button').addEventListener('click', () => {
   setTimeout(() => { overlay.style.display = 'none'; }, 600);
 });
 
-// ===== SWIPE UP TO OPEN MENU (during fullscreen gameplay) =====
-let touchStartY = 0;
-document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+// ===== SWIPE/DRAG UP TO OPEN MENU (touch + mouse) =====
+let dragStartY = 0;
+
+document.addEventListener('touchstart', e => { dragStartY = e.touches[0].clientY; }, { passive: true });
 document.addEventListener('touchend', e => {
   if (!document.body.classList.contains('fullscreen')) return;
-  const diff = touchStartY - e.changedTouches[0].clientY;
-  if (diff > 60) openOverlay();  // swipe up 60px+
+  if (dragStartY - e.changedTouches[0].clientY > 60) openOverlay();
 }, { passive: true });
+
+document.addEventListener('mousedown', e => { dragStartY = e.clientY; });
+document.addEventListener('mouseup', e => {
+  if (!document.body.classList.contains('fullscreen')) return;
+  if (dragStartY - e.clientY > 60) openOverlay();
+});
 
 function openOverlay() {
   const overlay = document.getElementById('ui-overlay');

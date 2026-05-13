@@ -53,7 +53,24 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
   font-size: 10px;
   color: #f0f8;
   letter-spacing: 2px;
+  margin-bottom: 8px;
 }
+
+#home-text {
+  font-family: sans-serif;
+  font-size: 12px;
+  color: #00f0ff;
+  text-shadow: 0 0 6px #00f0ff44;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0 4px;
+}
+#home-text a {
+  color: #f0f;
+  font-weight: bold;
+  text-decoration: none;
+}
+#home-text a:hover { text-decoration: underline; }
 
 #game-grid {
   display: grid;
@@ -423,6 +440,11 @@ body.fullscreen #swipe-hint { display: block; }
   <div id="home-header">
     <img src="logo.png" id="home-logo" alt="Highscore Gaming" onerror="this.style.display='none'">
     <div id="home-subtitle">CHOOSE YOUR GAME</div>
+    <p id="home-text">
+      Compete on our leaderboards and join exciting challenges with real crypto rewards!
+      Hold tokens, climb the ranks, and win HSC tokens or Solana. Every game could be your lucky break!<br>
+      👉 <a href="https://t.me/highscoresol" target="_blank">Join our Telegram</a>
+    </p>
   </div>
   <div id="game-grid"></div>
 </div>
@@ -816,7 +838,9 @@ document.addEventListener('mouseup', e => {
 function openOverlay() {
   const overlay = document.getElementById('ui-overlay');
   overlay.style.display = '';
-  overlay.classList.remove('hidden');
+  overlay.style.transform = 'translateY(100%)';
+  overlay.offsetHeight; // force reflow zodat de startpositie gezet is
+  overlay.style.transform = '';
   document.body.classList.remove('fullscreen');
 }
 

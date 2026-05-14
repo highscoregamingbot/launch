@@ -1501,8 +1501,8 @@ function getStartParamData() {
 }
 
 const startData = getStartParamData();
-let chatId = startData?.chatId || "";
-let selectedGameId = startData?.gameId || "";
+let chatId = startData?.chatId || urlParams.get('chat_id') || "";
+let selectedGameId = startData?.gameId || urlParams.get('game_id') || "";
 
 // ===== UTILITIES =====
 const baseURL = "https://highscoregamingbot.pythonanywhere.com";

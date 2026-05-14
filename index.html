@@ -452,6 +452,349 @@ body.fullscreen #swipe-zone { display: flex; }
   pointer-events: none;
   user-select: none;
 }
+
+/* ===== HOME HEADER PROFIEL KNOP ===== */
+#home-header { position: relative; }
+#profile-btn {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #f0f6;
+  background: rgba(255,0,255,0.15);
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#profile-btn:hover { border-color: #f0f; box-shadow: 0 0 10px #f0f5; }
+#profile-btn-avatar {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+/* ===== PROFILE SCREEN ===== */
+#screen-profile { overflow: hidden; }
+
+#profile-back {
+  padding: 13px 16px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #f0f;
+  background: rgba(0,0,0,0.5);
+  border-bottom: 1px solid #f0f3;
+  flex-shrink: 0;
+  letter-spacing: 1px;
+}
+#profile-back:hover { color: #fff; }
+
+#profile-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 14px 32px;
+  gap: 16px;
+}
+
+/* Avatar + naam */
+#profile-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+#profile-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 3px solid #f0f;
+  box-shadow: 0 0 18px #f0f5;
+  object-fit: cover;
+  background: #2a0050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  overflow: hidden;
+}
+#profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+#profile-name {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 0 10px #f0f5;
+}
+#profile-username {
+  font-size: 11px;
+  color: #f0f8;
+  letter-spacing: 1px;
+}
+
+/* Level badge + XP balk */
+#profile-level-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 380px;
+}
+#profile-level-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #f0f2, #a0f2);
+  border: 1px solid #f0f5;
+  border-radius: 20px;
+  padding: 5px 16px;
+}
+#profile-level-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f0f;
+  text-shadow: 0 0 8px #f0f;
+}
+#profile-level-title {
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: 1px;
+}
+#profile-xp-bar-wrap {
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  height: 8px;
+  overflow: hidden;
+}
+#profile-xp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #f0f, #a0f);
+  border-radius: 6px;
+  transition: width 0.6s ease;
+}
+#profile-xp-label {
+  font-size: 10px;
+  color: #f0f8;
+  letter-spacing: 1px;
+}
+
+/* Stats blokken */
+#profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  max-width: 380px;
+}
+.profile-stat {
+  background: rgba(40,0,80,0.6);
+  border: 1px solid #f0f3;
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+}
+.profile-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #00f0ff;
+  text-shadow: 0 0 8px #00f0ff5a;
+}
+.profile-stat-label {
+  font-size: 9px;
+  color: #f0f8;
+  letter-spacing: 1px;
+  margin-top: 3px;
+}
+
+/* Sectie titel */
+.profile-section-title {
+  width: 100%;
+  max-width: 380px;
+  font-size: 10px;
+  color: #f0f8;
+  letter-spacing: 2px;
+  border-bottom: 1px solid #f0f3;
+  padding-bottom: 5px;
+}
+
+/* Achievements */
+#profile-achievements {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  max-width: 380px;
+}
+.achievement {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(40,0,80,0.5);
+  border: 1px solid #f0f3;
+  border-radius: 10px;
+  padding: 9px 10px;
+  transition: border-color 0.2s;
+}
+.achievement.unlocked { border-color: #f0f6; }
+.achievement.locked { opacity: 0.4; filter: grayscale(0.6); }
+.achievement-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.achievement-info { min-width: 0; }
+.achievement-name { font-size: 11px; font-weight: 700; color: #fff; }
+.achievement-desc { font-size: 9px; color: #f0f8; margin-top: 1px; }
+
+/* Game scores lijst */
+#profile-game-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 380px;
+}
+.profile-game-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(40,0,80,0.5);
+  border: 1px solid #f0f3;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.profile-game-thumb {
+  width: 40px;
+  height: 28px;
+  border-radius: 5px;
+  object-fit: cover;
+  background: #1a001a;
+  flex-shrink: 0;
+}
+.profile-game-name {
+  flex: 1;
+  font-size: 11px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-game-score {
+  font-size: 12px;
+  font-weight: 700;
+  color: #00f0ff;
+  flex-shrink: 0;
+}
+.profile-game-rank {
+  font-size: 10px;
+  color: #f0f8;
+  flex-shrink: 0;
+  min-width: 50px;
+  text-align: right;
+}
+.profile-game-row.not-played { opacity: 0.35; }
+
+/* Wallet sectie */
+#profile-wallet-wrap {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(40,0,80,0.5);
+  border: 1px solid #f0f3;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#profile-wallet-group {
+  font-size: 10px;
+  color: #f0f8;
+  letter-spacing: 1px;
+}
+.wallet-network-toggle {
+  display: flex;
+  gap: 6px;
+}
+.wallet-net-btn {
+  flex: 1;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  padding: 6px 0;
+  border-radius: 7px;
+  border: 1px solid #f0f4;
+  background: transparent;
+  color: #f0f8;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.wallet-net-btn.active { background: rgba(255,0,255,0.25); border-color: #f0f; color: #fff; }
+#profile-wallet-input {
+  font-family: monospace;
+  font-size: 12px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid #f0f4;
+  border-radius: 8px;
+  color: #fff;
+  padding: 8px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+#profile-wallet-input:focus { border-color: #f0f; }
+#profile-wallet-save {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 0;
+  color: #fff;
+  background: linear-gradient(135deg, #f0f, #a0f);
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+#profile-wallet-save:hover { transform: scale(1.02); box-shadow: 0 0 16px #f0f6; }
+#profile-wallet-status {
+  font-size: 10px;
+  color: #00f0ff;
+  text-align: center;
+  min-height: 14px;
+}
+#profile-wallet-no-group {
+  font-size: 11px;
+  color: #f0f8;
+  text-align: center;
+  padding: 8px 0;
+}
+
+/* Level-up toast */
+#levelup-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: linear-gradient(135deg, #f0f, #a0f);
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 20px #f0f8;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s, transform 0.4s;
+  z-index: 9999;
+  white-space: nowrap;
+}
+#levelup-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
@@ -461,9 +804,80 @@ body.fullscreen #swipe-zone { display: flex; }
   <div id="home-header">
     <img src="logo.png" id="home-logo" alt="Highscore Gaming" onerror="this.style.display='none'">
     <div id="home-subtitle">CHOOSE YOUR GAME</div>
+    <div id="profile-btn" onclick="showProfile()">
+      <img id="profile-btn-avatar" src="" alt="👤" onerror="this.outerHTML='👤'">
+    </div>
   </div>
   <div id="game-grid"></div>
 </div>
+
+<!-- PROFILE SCREEN -->
+<div id="screen-profile" class="screen hidden">
+  <div id="profile-back">← Back</div>
+  <div id="profile-scroll">
+
+    <!-- Avatar + naam -->
+    <div id="profile-avatar-wrap">
+      <div id="profile-avatar"><img id="profile-avatar-img" src="" alt=""></div>
+      <div id="profile-name">—</div>
+      <div id="profile-username"></div>
+    </div>
+
+    <!-- Level badge + XP balk -->
+    <div id="profile-level-wrap">
+      <div id="profile-level-badge">
+        <span id="profile-level-num">1</span>
+        <span id="profile-level-title">Noob</span>
+      </div>
+      <div id="profile-xp-bar-wrap"><div id="profile-xp-bar" style="width:0%"></div></div>
+      <div id="profile-xp-label">0 / 1000 XP</div>
+    </div>
+
+    <!-- Stats -->
+    <div id="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="stat-games">—</div>
+        <div class="profile-stat-label">GAMES</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="stat-pvp">—</div>
+        <div class="profile-stat-label">PvP WINS</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="stat-rank">—</div>
+        <div class="profile-stat-label">BEST RANK</div>
+      </div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="profile-section-title">ACHIEVEMENTS</div>
+    <div id="profile-achievements"></div>
+
+    <!-- Game scores -->
+    <div class="profile-section-title">GAME SCORES</div>
+    <div id="profile-game-scores"></div>
+
+    <!-- Wallet -->
+    <div class="profile-section-title">WALLET</div>
+    <div id="profile-wallet-wrap">
+      <div id="profile-wallet-no-group" style="display:none">Open from a group to link your wallet</div>
+      <div id="profile-wallet-fields" style="display:none">
+        <div id="profile-wallet-group"></div>
+        <div class="wallet-network-toggle">
+          <button class="wallet-net-btn active" data-net="solana" onclick="selectNetwork('solana')">SOL</button>
+          <button class="wallet-net-btn" data-net="ton" onclick="selectNetwork('ton')">TON</button>
+        </div>
+        <input id="profile-wallet-input" type="text" placeholder="Wallet address...">
+        <button id="profile-wallet-save" onclick="saveWallet()">SAVE WALLET</button>
+        <div id="profile-wallet-status"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Level-up toast -->
+<div id="levelup-toast"></div>
 
 <!-- PRE-GAME SCREEN -->
 <div id="screen-pregame" class="screen hidden">
@@ -525,6 +939,215 @@ body.fullscreen #swipe-zone { display: flex; }
 </div>
 
 <script>
+// ===== LEVEL SYSTEEM =====
+const LEVEL_TITLES = [
+  [900, "GOD"], [800, "Legend"], [700, "Veteran"], [600, "Cracked"],
+  [500, "Gamer"], [400, "Grinder"], [300, "Tryhard"],
+  [200, "Button Masher"], [100, "Rookie"], [0, "Noob"]
+];
+function getLevelTitle(level) {
+  for (const [threshold, title] of LEVEL_TITLES)
+    if (level >= threshold) return title;
+  return "Noob";
+}
+
+function showLevelUpToast(level) {
+  const toast = document.getElementById('levelup-toast');
+  toast.textContent = `⬆️ Level up! Je bent nu level ${level} · ${getLevelTitle(level)}`;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// ===== ACHIEVEMENTS CONFIG =====
+const ACHIEVEMENTS = [
+  { id: 'first_blood',    icon: '🎮', name: 'First Blood',   desc: 'Play 1 game',         check: d => d.total_games_played >= 1 },
+  { id: 'globe_trotter',  icon: '🌍', name: 'Globe Trotter', desc: 'Play 3+ games',        check: d => d.games.filter(g => g.score !== null).length >= 3 },
+  { id: 'completionist',  icon: '🕹️', name: 'Completionist', desc: 'Play all 9 games',     check: d => d.games.filter(g => g.score !== null).length >= 9 },
+  { id: 'pvp_fighter',    icon: '⚔️', name: 'PvP Fighter',   desc: '1+ PvP match',         check: d => d.pvp.total_matches >= 1 },
+  { id: 'pvp_king',       icon: '👑', name: 'PvP King',      desc: '10+ PvP wins',         check: d => d.pvp.wins >= 10 },
+  { id: 'top10',          icon: '🏆', name: 'Top 10',        desc: 'Top 10 global',        check: d => d.games.some(g => g.global_rank !== null && g.global_rank <= 10) },
+  { id: 'elite',          icon: '💎', name: 'Elite',         desc: 'Top 3 global',         check: d => d.games.some(g => g.global_rank !== null && g.global_rank <= 3) },
+  { id: 'champion',       icon: '🥇', name: 'Champion',      desc: '#1 global in any game',check: d => d.games.some(g => g.global_rank === 1) },
+];
+
+// ===== PROFIEL LADEN =====
+async function loadProfile() {
+  if (!telegramId) return;
+
+  // Avatar in profiel
+  const avatarImg = document.getElementById('profile-avatar-img');
+  if (username) {
+    avatarImg.src = `https://t.me/i/userpic/320/${username}.jpg`;
+    avatarImg.onerror = () => { avatarImg.style.display = 'none'; };
+  } else {
+    avatarImg.style.display = 'none';
+  }
+
+  // Naam
+  const displayName = [firstName, lastName].filter(Boolean).join(' ') || `@${username}` || '—';
+  document.getElementById('profile-name').textContent = displayName;
+  document.getElementById('profile-username').textContent = username ? `@${username}` : '';
+
+  // Profiel data ophalen
+  try {
+    const res = await fetch(`${baseURL}/user_profile/${telegramId}`);
+    const data = await res.json();
+    renderProfileData(data);
+  } catch(e) {
+    console.error('Profile load error:', e);
+  }
+
+  // Wallet laden
+  loadWallet();
+}
+
+function renderProfileData(data) {
+  // XP / level
+  const xp = data.xp || {};
+  const level = xp.level || 1;
+  const title = xp.title || getLevelTitle(level);
+  const progress = xp.progress || 0;
+  const needed = xp.needed || 1000;
+  const pct = Math.min(100, Math.round(progress / needed * 100));
+
+  document.getElementById('profile-level-num').textContent = level;
+  document.getElementById('profile-level-title').textContent = `· ${title}`;
+  document.getElementById('profile-xp-bar').style.width = pct + '%';
+  document.getElementById('profile-xp-label').textContent =
+    `${(xp.total || 0).toLocaleString()} XP · ${progress.toLocaleString()} / ${needed.toLocaleString()} to next level`;
+
+  // Stats
+  document.getElementById('stat-games').textContent = data.total_games_played || 0;
+  document.getElementById('stat-pvp').textContent = data.pvp?.wins || 0;
+
+  // Beste rank over alle games
+  const ranks = (data.games || []).filter(g => g.global_rank !== null).map(g => g.global_rank);
+  document.getElementById('stat-rank').textContent = ranks.length ? '#' + Math.min(...ranks) : '—';
+
+  // Achievements
+  const achWrap = document.getElementById('profile-achievements');
+  achWrap.innerHTML = '';
+  ACHIEVEMENTS.forEach(ach => {
+    const unlocked = ach.check(data);
+    const div = document.createElement('div');
+    div.className = `achievement ${unlocked ? 'unlocked' : 'locked'}`;
+    div.innerHTML = `
+      <span class="achievement-icon">${ach.icon}</span>
+      <div class="achievement-info">
+        <div class="achievement-name">${ach.name}</div>
+        <div class="achievement-desc">${ach.desc}</div>
+      </div>
+    `;
+    achWrap.appendChild(div);
+  });
+
+  // Game scores
+  const scoresWrap = document.getElementById('profile-game-scores');
+  scoresWrap.innerHTML = '';
+  (data.games || []).forEach(g => {
+    const game = GAMES[g.game_id];
+    if (!game) return;
+    const played = g.score !== null;
+    const rankStr = g.global_rank ? `#${g.global_rank} 🌍` : '';
+    const div = document.createElement('div');
+    div.className = `profile-game-row${played ? '' : ' not-played'}`;
+    div.innerHTML = `
+      <img class="profile-game-thumb" src="${game.thumbnail}" alt="${game.title}"
+           onerror="this.style.background='#2a0050'">
+      <span class="profile-game-name">${game.title}</span>
+      <span class="profile-game-score">${played ? formatScore(g.score) : '—'}</span>
+      <span class="profile-game-rank">${rankStr}</span>
+    `;
+    scoresWrap.appendChild(div);
+  });
+}
+
+function showProfile() {
+  showScreen('screen-profile');
+  loadProfile();
+}
+
+// ===== WALLET =====
+let selectedNetwork = 'solana';
+
+function selectNetwork(net) {
+  selectedNetwork = net;
+  document.querySelectorAll('.wallet-net-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.net === net);
+  });
+}
+
+async function loadWallet() {
+  const walletFields = document.getElementById('profile-wallet-fields');
+  const noGroup = document.getElementById('profile-wallet-no-group');
+
+  if (!chatId) {
+    noGroup.style.display = '';
+    walletFields.style.display = 'none';
+    return;
+  }
+
+  noGroup.style.display = 'none';
+  walletFields.style.display = 'flex';
+  walletFields.style.flexDirection = 'column';
+  walletFields.style.gap = '8px';
+
+  // Groepsnaam tonen (chatId beschikbaar, titel ophalen uit startData of leeg laten)
+  const groupLabel = document.getElementById('profile-wallet-group');
+  groupLabel.textContent = `GROUP: ${chatId}`;
+
+  try {
+    const res = await fetch(`${baseURL}/user_wallet?telegram_id=${telegramId}&chat_id=${chatId}`);
+    const data = await res.json();
+    if (data.wallet_address) {
+      document.getElementById('profile-wallet-input').value = data.wallet_address;
+      selectNetwork(data.network || 'solana');
+    }
+  } catch(e) {}
+}
+
+async function saveWallet() {
+  const address = document.getElementById('profile-wallet-input').value.trim();
+  const statusEl = document.getElementById('profile-wallet-status');
+  const saveBtn = document.getElementById('profile-wallet-save');
+
+  if (!address) { statusEl.textContent = 'Enter a wallet address'; return; }
+  if (!telegramId || !chatId) { statusEl.textContent = 'Missing user or group info'; return; }
+
+  saveBtn.disabled = true;
+  statusEl.textContent = 'Saving...';
+
+  try {
+    const body = new URLSearchParams({
+      telegram_id: telegramId,
+      chat_id: chatId,
+      wallet_address: address,
+      network: selectedNetwork
+    });
+    const res = await fetch(`${baseURL}/user_wallet`, { method: 'POST', body });
+    const data = await res.json();
+    statusEl.textContent = data.status === 'ok' ? '✅ Wallet saved!' : '❌ Error saving';
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+  } catch(e) {
+    statusEl.textContent = '❌ Network error';
+  }
+  saveBtn.disabled = false;
+}
+
+// ===== XP AWARD =====
+let sessionStartTime = null;
+
+async function awardXp(xp, reason, game_id = '') {
+  if (!telegramId) return null;
+  try {
+    const body = new URLSearchParams({ telegram_id: telegramId, xp, reason, game_id });
+    const res = await fetch(`${baseURL}/award_xp`, { method: 'POST', body });
+    const data = await res.json();
+    if (data.leveled_up) showLevelUpToast(data.level);
+    return data;
+  } catch(e) { return null; }
+}
+
 // ===== GAMES CONFIG =====
 const GAMES = {
   maze_runner: {
@@ -840,6 +1463,7 @@ function loadUnityGame(gameId) {
 // ===== PLAY BUTTON =====
 document.getElementById('play-button').addEventListener('click', () => {
   if (!isLoaded) return;
+  sessionStartTime = Date.now();
   const overlay = document.getElementById('ui-overlay');
   overlay.classList.add('hidden');
   document.body.classList.add('fullscreen');
@@ -899,6 +1523,13 @@ function openOverlay() {
 
 // ===== GAME OVER HOOK =====
 window.onGameOver = function() {
+  // XP voor speeltijd
+  if (sessionStartTime && telegramId) {
+    const minutesPlayed = (Date.now() - sessionStartTime) / 60000;
+    const xpEarned = Math.max(1, Math.floor(minutesPlayed * 50));
+    awardXp(xpEarned, 'playtime', selectedGameId);
+    sessionStartTime = null;
+  }
   setTimeout(() => {
     if (selectedGameId) selectGame(selectedGameId);
   }, 1500);
@@ -907,6 +1538,10 @@ window.onGameOver = function() {
 
 // ===== BACK BUTTONS =====
 document.getElementById('pregame-back').addEventListener('click', () => {
+  showScreen('screen-home');
+});
+
+document.getElementById('profile-back').addEventListener('click', () => {
   showScreen('screen-home');
 });
 
@@ -1012,6 +1647,12 @@ limitSelect.addEventListener('change', e => {
 
 // ===== INIT =====
 buildHomeScreen();
+
+// Profiel-knop avatar instellen
+if (username) {
+  const btnAvatar = document.getElementById('profile-btn-avatar');
+  btnAvatar.src = `https://t.me/i/userpic/320/${username}.jpg`;
+}
 
 if (selectedGameId && GAMES[selectedGameId]) {
   // Launched from Telegram with startapp → go straight to game screen and load Unity

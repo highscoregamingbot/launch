@@ -8,6 +8,7 @@
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
+:root { --safe-top: var(--safe-top); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -35,7 +36,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 #home-header {
   padding: 14px 16px 10px;
-  padding-top: calc(14px + env(safe-area-inset-top));
+  padding-top: calc(14px + var(--safe-top));
   text-align: center;
   background: rgba(0,0,0,0.5);
   border-bottom: 1px solid #f0f4;
@@ -149,7 +150,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 #pregame-back {
   padding: 13px 16px;
-  padding-top: calc(13px + env(safe-area-inset-top));
+  padding-top: calc(13px + var(--safe-top));
   cursor: pointer;
   font-size: 12px;
   color: #f0f;
@@ -256,7 +257,10 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 #unity-container {
   position: absolute;
-  inset: 0;
+  top: var(--safe-top);
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: #111;
   z-index: 0;
 }
@@ -267,7 +271,10 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 .ui-overlay {
   position: absolute;
-  inset: 0;
+  top: var(--safe-top);
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -488,7 +495,7 @@ body.fullscreen #swipe-zone { display: flex; }
 
 #profile-back {
   padding: 13px 16px;
-  padding-top: calc(13px + env(safe-area-inset-top));
+  padding-top: calc(13px + var(--safe-top));
   cursor: pointer;
   font-size: 12px;
   color: #f0f;
@@ -1857,6 +1864,13 @@ limitSelect.addEventListener('change', e => {
 buildHomeScreen();
 
 // Gamee-stijl: fullscreen + branding
+function updateSafeTop() {
+  const contentTop = tg?.contentSafeAreaInset?.top || 0;
+  const deviceTop  = tg?.safeAreaInset?.top || 0;
+  const total = Math.max(contentTop, deviceTop);
+  if (total > 0) document.documentElement.style.setProperty('--safe-top', total + 'px');
+}
+
 function tryFullscreen() {
   if (!tg) return;
   const platform = tg.platform || '';
@@ -1868,10 +1882,16 @@ function tryFullscreen() {
   if (isMobile && typeof tg.requestFullscreen === 'function') {
     try { tg.requestFullscreen(); } catch(e) {}
   }
+  updateSafeTop();
 }
 tryFullscreen();
-// Retry na 500ms voor game webviews die trager initialiseren
 setTimeout(tryFullscreen, 500);
+
+if (tg) {
+  tg.onEvent?.('safeAreaChanged', updateSafeTop);
+  tg.onEvent?.('contentSafeAreaChanged', updateSafeTop);
+  tg.onEvent?.('fullscreenChanged', updateSafeTop);
+}
 
 // Profiel-knop avatar instellen
 if (username) {

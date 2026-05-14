@@ -910,6 +910,28 @@ body.fullscreen #swipe-zone { display: flex; }
   white-space: nowrap;
 }
 #levelup-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Achievement toast */
+#achievement-toast {
+  position: fixed;
+  bottom: 130px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: linear-gradient(135deg, #0af, #06f);
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 20px #0af8;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s, transform 0.4s;
+  z-index: 9999;
+  white-space: nowrap;
+}
+#achievement-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
@@ -1020,6 +1042,8 @@ body.fullscreen #swipe-zone { display: flex; }
 
 <!-- Level-up toast -->
 <div id="levelup-toast"></div>
+<!-- Achievement toast -->
+<div id="achievement-toast"></div>
 
 <!-- PRE-GAME SCREEN -->
 <div id="screen-pregame" class="screen hidden">
@@ -1098,6 +1122,42 @@ function showLevelUpToast(level) {
   toast.textContent = `⬆️ Level up! Je bent nu level ${level} · ${getLevelTitle(level)}`;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+let _achievementToastQueue = [];
+let _achievementToastRunning = false;
+function showAchievementToast(ach) {
+  _achievementToastQueue.push(ach);
+  if (!_achievementToastRunning) _runAchievementToastQueue();
+}
+function _runAchievementToastQueue() {
+  if (_achievementToastQueue.length === 0) { _achievementToastRunning = false; return; }
+  _achievementToastRunning = true;
+  const ach = _achievementToastQueue.shift();
+  const toast = document.getElementById('achievement-toast');
+  toast.textContent = `${ach.icon} Achievement unlocked: ${ach.name}`;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(_runAchievementToastQueue, 500);
+  }, 3000);
+}
+
+function checkNewAchievements(data) {
+  if (!telegramId) return;
+  const key = `achievements_${telegramId}`;
+  const stored = JSON.parse(localStorage.getItem(key) || '[]');
+  const newlyUnlocked = [];
+  ACHIEVEMENTS.forEach(ach => {
+    if (ach.check(data) && !stored.includes(ach.id)) {
+      newlyUnlocked.push(ach);
+      stored.push(ach.id);
+    }
+  });
+  if (newlyUnlocked.length > 0) {
+    localStorage.setItem(key, JSON.stringify(stored));
+    newlyUnlocked.forEach(ach => showAchievementToast(ach));
+  }
 }
 
 // ===== ACHIEVEMENTS CONFIG =====
@@ -1182,6 +1242,7 @@ function renderProfileData(data) {
     `;
     achWrap.appendChild(div);
   });
+  checkNewAchievements(data);
 
   // Game scores
   const scoresWrap = document.getElementById('profile-game-scores');

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Highscore Gaming</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -35,6 +35,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 #home-header {
   padding: 14px 16px 10px;
+  padding-top: calc(14px + env(safe-area-inset-top));
   text-align: center;
   background: rgba(0,0,0,0.5);
   border-bottom: 1px solid #f0f4;
@@ -148,6 +149,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 #pregame-back {
   padding: 13px 16px;
+  padding-top: calc(13px + env(safe-area-inset-top));
   cursor: pointer;
   font-size: 12px;
   color: #f0f;
@@ -486,6 +488,7 @@ body.fullscreen #swipe-zone { display: flex; }
 
 #profile-back {
   padding: 13px 16px;
+  padding-top: calc(13px + env(safe-area-inset-top));
   cursor: pointer;
   font-size: 12px;
   color: #f0f;
@@ -1855,9 +1858,15 @@ buildHomeScreen();
 
 // Gamee-stijl: fullscreen + branding
 if (tg) {
-  tg.expand();
-  tg.setHeaderColor('#1a001a');
-  tg.setBackgroundColor('#0a0010');
+  // requestFullscreen = Bot API 8.0+ true fullscreen (like Gamee)
+  if (typeof tg.requestFullscreen === 'function') {
+    tg.requestFullscreen();
+  } else {
+    tg.expand();
+  }
+  tg.disableVerticalSwipes?.();
+  tg.setHeaderColor?.('#1a001a');
+  tg.setBackgroundColor?.('#0a0010');
 }
 
 // Profiel-knop avatar instellen

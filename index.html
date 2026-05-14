@@ -485,6 +485,27 @@ body.fullscreen #swipe-zone { display: flex; }
   display: block;
 }
 
+/* ===== TOP LOGO BAR (in Telegram fullscreen safe zone) ===== */
+#top-logo-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--safe-top);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+#top-logo-bar img {
+  height: 70%;
+  max-height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px #f0f6);
+}
+
 /* ===== PROFILE SCREEN ===== */
 #screen-profile { overflow: hidden; }
 
@@ -874,6 +895,11 @@ body.fullscreen #swipe-zone { display: flex; }
   </style>
 </head>
 <body>
+
+<!-- ALWAYS-VISIBLE TOP LOGO (in Telegram fullscreen header zone) -->
+<div id="top-logo-bar">
+  <img src="logo-header.png" alt="Highscore Gaming" onerror="this.style.display='none'">
+</div>
 
 <!-- HOME SCREEN -->
 <div id="screen-home" class="screen">

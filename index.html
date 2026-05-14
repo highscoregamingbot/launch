@@ -774,6 +774,77 @@ body.fullscreen #swipe-zone { display: flex; }
   padding: 8px 0;
 }
 
+/* Wallet group selector */
+#wallet-group-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+#wallet-group-select {
+  flex: 1;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid #f0f4;
+  border-radius: 8px;
+  color: #fff;
+  padding: 8px 10px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+#wallet-group-select:focus { border-color: #f0f; }
+#wallet-group-select option { background: #1a001a; color: #fff; }
+.wallet-add-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 12px;
+  background: rgba(255,0,255,0.15);
+  border: 1px solid #f0f4;
+  border-radius: 8px;
+  color: #f0f;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.wallet-add-btn:hover { background: rgba(255,0,255,0.25); }
+#wallet-manual-row { display: none; flex-direction: column; gap: 6px; }
+#wallet-manual-chatid {
+  font-family: monospace;
+  font-size: 12px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid #f0f4;
+  border-radius: 8px;
+  color: #fff;
+  padding: 8px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+#wallet-manual-chatid:focus { border-color: #f0f; }
+/* Linked wallet display */
+#wallet-linked-view { display: none; flex-direction: column; gap: 8px; }
+#wallet-linked-network {
+  font-size: 10px;
+  color: #f0f8;
+  letter-spacing: 1.5px;
+}
+#wallet-linked-address {
+  font-family: monospace;
+  font-size: 12px;
+  color: #00f0ff;
+  word-break: break-all;
+  background: rgba(0,240,255,0.05);
+  border: 1px solid #00f0ff22;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.wallet-remove-btn { color: #ff4466 !important; border-color: #ff446640 !important; }
+/* Wallet edit form */
+#wallet-edit-view { display: none; flex-direction: column; gap: 8px; }
+
 /* Level-up toast */
 #levelup-toast {
   position: fixed;
@@ -860,9 +931,32 @@ body.fullscreen #swipe-zone { display: flex; }
     <!-- Wallet -->
     <div class="profile-section-title">WALLET</div>
     <div id="profile-wallet-wrap">
-      <div id="profile-wallet-no-group" style="display:none">Open from a group to link your wallet</div>
-      <div id="profile-wallet-fields" style="display:none">
-        <div id="profile-wallet-group"></div>
+      <!-- Group selector -->
+      <div id="wallet-group-row">
+        <select id="wallet-group-select" onchange="onGroupSelectChange()">
+          <option value="">Choose a group...</option>
+        </select>
+        <button class="wallet-add-btn" onclick="toggleManualGroup(true)">+ Add</button>
+      </div>
+      <!-- Manual chatId input -->
+      <div id="wallet-manual-row">
+        <input id="wallet-manual-chatid" type="text" placeholder="Group chat ID (e.g. -10012345)">
+        <div style="display:flex;gap:6px;margin-top:4px">
+          <button class="wallet-net-btn" style="flex:1" onclick="confirmManualGroup()">Confirm</button>
+          <button class="wallet-net-btn" style="flex:1;opacity:0.6" onclick="toggleManualGroup(false)">Cancel</button>
+        </div>
+      </div>
+      <!-- Linked wallet display -->
+      <div id="wallet-linked-view">
+        <div id="wallet-linked-network"></div>
+        <div id="wallet-linked-address"></div>
+        <div style="display:flex;gap:6px">
+          <button class="wallet-net-btn" style="flex:1" onclick="startEditWallet()">CHANGE</button>
+          <button class="wallet-net-btn wallet-remove-btn" style="flex:1" onclick="deleteWallet()">REMOVE</button>
+        </div>
+      </div>
+      <!-- Wallet edit / add form -->
+      <div id="wallet-edit-view">
         <div class="wallet-network-toggle">
           <button class="wallet-net-btn active" data-net="solana" onclick="selectNetwork('solana')">SOL</button>
           <button class="wallet-net-btn" data-net="ton" onclick="selectNetwork('ton')">TON</button>
@@ -1069,6 +1163,8 @@ function showProfile() {
 
 // ===== WALLET =====
 let selectedNetwork = 'solana';
+let selectedWalletChatId = '';
+let walletGroups = []; // [{chat_id, chat_title, wallet_address, network}]
 
 function selectNetwork(net) {
   selectedNetwork = net;
@@ -1078,30 +1174,94 @@ function selectNetwork(net) {
 }
 
 async function loadWallet() {
-  const walletFields = document.getElementById('profile-wallet-fields');
-  const noGroup = document.getElementById('profile-wallet-no-group');
+  if (!telegramId) return;
 
-  if (!chatId) {
-    noGroup.style.display = '';
-    walletFields.style.display = 'none';
-    return;
-  }
-
-  noGroup.style.display = 'none';
-  walletFields.style.display = 'flex';
-  walletFields.style.flexDirection = 'column';
-  walletFields.style.gap = '8px';
-
-  // Groepsnaam tonen (chatId beschikbaar, titel ophalen uit startData of leeg laten)
-  const groupLabel = document.getElementById('profile-wallet-group');
-  groupLabel.textContent = `GROUP: ${chatId}`;
-
+  // Haal alle groepen op waar speler ooit heeft gespeeld (inclusief wallet info)
   try {
-    const res = await fetch(`${baseURL}/user_wallet?telegram_id=${telegramId}&chat_id=${chatId}`);
+    const res = await fetch(`${baseURL}/user_groups/${telegramId}`);
     const data = await res.json();
-    if (data.wallet_address) {
-      document.getElementById('profile-wallet-input').value = data.wallet_address;
-      selectNetwork(data.network || 'solana');
+    walletGroups = data.groups || [];
+  } catch(e) { walletGroups = []; }
+
+  const select = document.getElementById('wallet-group-select');
+  select.innerHTML = '<option value="">Choose a group...</option>';
+  walletGroups.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g.chat_id;
+    opt.textContent = g.chat_title || g.chat_id;
+    select.appendChild(opt);
+  });
+
+  // Pre-selecteer chatId uit startData als die beschikbaar is
+  if (chatId) {
+    if (!walletGroups.some(g => g.chat_id === chatId)) {
+      // Groep nog niet in lijst (score nog niet ingediend) — voeg toe
+      const opt = document.createElement('option');
+      opt.value = chatId;
+      opt.textContent = chatId;
+      select.appendChild(opt);
+      walletGroups.push({ chat_id: chatId, chat_title: chatId, wallet_address: null, network: null });
+      // Probeer wallet toch op te halen
+      try {
+        const r = await fetch(`${baseURL}/user_wallet?telegram_id=${telegramId}&chat_id=${chatId}`);
+        const d = await r.json();
+        const g = walletGroups.find(x => x.chat_id === chatId);
+        if (g && d.wallet_address) { g.wallet_address = d.wallet_address; g.network = d.network; }
+      } catch(e) {}
+    }
+    select.value = chatId;
+    selectedWalletChatId = chatId;
+    renderWalletForGroup(chatId);
+  }
+}
+
+function onGroupSelectChange() {
+  const val = document.getElementById('wallet-group-select').value;
+  document.getElementById('wallet-linked-view').style.display = 'none';
+  document.getElementById('wallet-edit-view').style.display = 'none';
+  if (!val) return;
+  selectedWalletChatId = val;
+  renderWalletForGroup(val);
+}
+
+function renderWalletForGroup(groupChatId) {
+  const group = walletGroups.find(g => g.chat_id === groupChatId);
+  const linkedView = document.getElementById('wallet-linked-view');
+  const editView = document.getElementById('wallet-edit-view');
+
+  if (group && group.wallet_address) {
+    document.getElementById('wallet-linked-network').textContent =
+      (group.network || 'solana').toUpperCase() + ' WALLET';
+    document.getElementById('wallet-linked-address').textContent = group.wallet_address;
+    linkedView.style.display = 'flex';
+    editView.style.display = 'none';
+  } else {
+    document.getElementById('profile-wallet-input').value = '';
+    editView.style.display = 'flex';
+    linkedView.style.display = 'none';
+  }
+}
+
+function startEditWallet() {
+  const group = walletGroups.find(g => g.chat_id === selectedWalletChatId);
+  if (group) {
+    document.getElementById('profile-wallet-input').value = group.wallet_address || '';
+    selectNetwork(group.network || 'solana');
+  }
+  document.getElementById('wallet-linked-view').style.display = 'none';
+  document.getElementById('wallet-edit-view').style.display = 'flex';
+}
+
+async function deleteWallet() {
+  if (!selectedWalletChatId || !telegramId) return;
+  try {
+    const body = new URLSearchParams({ telegram_id: telegramId, chat_id: selectedWalletChatId });
+    const res = await fetch(`${baseURL}/user_wallet`, { method: 'DELETE', body });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      const group = walletGroups.find(g => g.chat_id === selectedWalletChatId);
+      if (group) { group.wallet_address = null; group.network = null; }
+      renderWalletForGroup(selectedWalletChatId);
     }
   } catch(e) {}
 }
@@ -1112,7 +1272,7 @@ async function saveWallet() {
   const saveBtn = document.getElementById('profile-wallet-save');
 
   if (!address) { statusEl.textContent = 'Enter a wallet address'; return; }
-  if (!telegramId || !chatId) { statusEl.textContent = 'Missing user or group info'; return; }
+  if (!telegramId || !selectedWalletChatId) { statusEl.textContent = 'Select a group first'; return; }
 
   saveBtn.disabled = true;
   statusEl.textContent = 'Saving...';
@@ -1120,18 +1280,63 @@ async function saveWallet() {
   try {
     const body = new URLSearchParams({
       telegram_id: telegramId,
-      chat_id: chatId,
+      chat_id: selectedWalletChatId,
       wallet_address: address,
       network: selectedNetwork
     });
     const res = await fetch(`${baseURL}/user_wallet`, { method: 'POST', body });
     const data = await res.json();
-    statusEl.textContent = data.status === 'ok' ? '✅ Wallet saved!' : '❌ Error saving';
-    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    if (data.status === 'ok') {
+      const group = walletGroups.find(g => g.chat_id === selectedWalletChatId);
+      if (group) { group.wallet_address = address; group.network = selectedNetwork; }
+      renderWalletForGroup(selectedWalletChatId);
+    } else {
+      statusEl.textContent = '❌ Error saving';
+      setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    }
   } catch(e) {
     statusEl.textContent = '❌ Network error';
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
   }
   saveBtn.disabled = false;
+}
+
+function toggleManualGroup(show) {
+  const el = document.getElementById('wallet-manual-row');
+  el.style.display = show ? 'flex' : 'none';
+  if (show) {
+    el.style.flexDirection = 'column';
+    el.style.gap = '6px';
+    document.getElementById('wallet-manual-chatid').focus();
+  }
+}
+
+async function confirmManualGroup() {
+  const input = document.getElementById('wallet-manual-chatid');
+  const chatIdVal = input.value.trim();
+  if (!chatIdVal) return;
+
+  const select = document.getElementById('wallet-group-select');
+  if (!select.querySelector(`option[value="${chatIdVal}"]`)) {
+    const opt = document.createElement('option');
+    opt.value = chatIdVal;
+    opt.textContent = chatIdVal;
+    select.appendChild(opt);
+    walletGroups.push({ chat_id: chatIdVal, chat_title: chatIdVal, wallet_address: null, network: null });
+  }
+  select.value = chatIdVal;
+  selectedWalletChatId = chatIdVal;
+  toggleManualGroup(false);
+  input.value = '';
+
+  // Probeer bestaande wallet op te halen voor deze groep
+  try {
+    const r = await fetch(`${baseURL}/user_wallet?telegram_id=${telegramId}&chat_id=${chatIdVal}`);
+    const d = await r.json();
+    const g = walletGroups.find(x => x.chat_id === chatIdVal);
+    if (g && d.wallet_address) { g.wallet_address = d.wallet_address; g.network = d.network; }
+  } catch(e) {}
+  renderWalletForGroup(chatIdVal);
 }
 
 // ===== XP AWARD =====

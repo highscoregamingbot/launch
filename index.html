@@ -1858,8 +1858,9 @@ buildHomeScreen();
 
 // Gamee-stijl: fullscreen + branding
 if (tg) {
-  // requestFullscreen = Bot API 8.0+ true fullscreen (like Gamee)
-  if (typeof tg.requestFullscreen === 'function') {
+  const platform = tg.platform || '';
+  const isMobile = platform === 'android' || platform === 'ios' || platform === 'android_x';
+  if (isMobile && typeof tg.requestFullscreen === 'function') {
     tg.requestFullscreen();
   } else {
     tg.expand();

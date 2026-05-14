@@ -1486,10 +1486,10 @@ const urlParams = new URLSearchParams(window.location.search);
 const tg = window.Telegram?.WebApp;
 const tgUser = tg?.initDataUnsafe?.user || {};
 
-const telegramId = tgUser.id || "";
-const username   = tgUser.username || "";
-const firstName  = tgUser.first_name || "";
-const lastName   = tgUser.last_name || "";
+const telegramId = tgUser.id || urlParams.get('telegram_id') || "";
+const username   = tgUser.username || urlParams.get('username') || "";
+const firstName  = tgUser.first_name || urlParams.get('first_name') || "";
+const lastName   = tgUser.last_name || urlParams.get('last_name') || "";
 
 function getStartParamData() {
   let param = urlParams.get('startapp') || urlParams.get('start_param');

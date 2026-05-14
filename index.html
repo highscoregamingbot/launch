@@ -1857,18 +1857,21 @@ limitSelect.addEventListener('change', e => {
 buildHomeScreen();
 
 // Gamee-stijl: fullscreen + branding
-if (tg) {
+function tryFullscreen() {
+  if (!tg) return;
   const platform = tg.platform || '';
   const isMobile = platform === 'android' || platform === 'ios' || platform === 'android_x';
-  if (isMobile && typeof tg.requestFullscreen === 'function') {
-    tg.requestFullscreen();
-  } else {
-    tg.expand();
-  }
-  tg.disableVerticalSwipes?.();
+  tg.expand();
   tg.setHeaderColor?.('#1a001a');
   tg.setBackgroundColor?.('#0a0010');
+  tg.disableVerticalSwipes?.();
+  if (isMobile && typeof tg.requestFullscreen === 'function') {
+    try { tg.requestFullscreen(); } catch(e) {}
+  }
 }
+tryFullscreen();
+// Retry na 500ms voor game webviews die trager initialiseren
+setTimeout(tryFullscreen, 500);
 
 // Profiel-knop avatar instellen
 if (username) {

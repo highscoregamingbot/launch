@@ -8,7 +8,7 @@
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-:root { --safe-top: env(safe-area-inset-top, 0px); }
+:root { --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -439,14 +439,14 @@ body.fullscreen .ui-overlay { transform: translateY(100%); }
   bottom: 0;
   left: 0;
   right: 0;
-  height: 52px;
+  height: calc(28px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
   z-index: 50;
   align-items: center;
   justify-content: center;
   cursor: n-resize;
 }
 body.fullscreen #swipe-zone { display: flex; }
-#swipe-zone { height: 28px; }
 
 #swipe-hint-text {
   color: rgba(255,255,255,0.3);
@@ -1859,11 +1859,16 @@ limitSelect.addEventListener('change', e => {
 buildHomeScreen();
 
 // Gamee-stijl: fullscreen + branding
-function updateSafeTop() {
+function updateSafeArea() {
   const contentTop = tg?.contentSafeAreaInset?.top || 0;
   const deviceTop  = tg?.safeAreaInset?.top || 0;
-  const total = Math.max(contentTop, deviceTop);
-  if (total > 0) document.documentElement.style.setProperty('--safe-top', total + 'px');
+  const totalTop   = Math.max(contentTop, deviceTop);
+  if (totalTop > 0) document.documentElement.style.setProperty('--safe-top', totalTop + 'px');
+
+  const contentBottom = tg?.contentSafeAreaInset?.bottom || 0;
+  const deviceBottom  = tg?.safeAreaInset?.bottom || 0;
+  const totalBottom   = Math.max(contentBottom, deviceBottom);
+  if (totalBottom > 0) document.documentElement.style.setProperty('--safe-bottom', totalBottom + 'px');
 }
 
 function tryFullscreen() {
@@ -1877,15 +1882,16 @@ function tryFullscreen() {
   if (isMobile && typeof tg.requestFullscreen === 'function') {
     try { tg.requestFullscreen(); } catch(e) {}
   }
-  updateSafeTop();
+  updateSafeArea();
 }
 tryFullscreen();
-setTimeout(tryFullscreen, 500);
+// Multiple retries — contentSafeAreaInset.top is 0 until fullscreen fully activates
+[200, 500, 1000, 2000].forEach(ms => setTimeout(updateSafeArea, ms));
 
 if (tg) {
-  tg.onEvent?.('safeAreaChanged', updateSafeTop);
-  tg.onEvent?.('contentSafeAreaChanged', updateSafeTop);
-  tg.onEvent?.('fullscreenChanged', updateSafeTop);
+  tg.onEvent?.('safeAreaChanged', updateSafeArea);
+  tg.onEvent?.('contentSafeAreaChanged', updateSafeArea);
+  tg.onEvent?.('fullscreenChanged', () => { updateSafeArea(); setTimeout(updateSafeArea, 300); });
 }
 
 // Profiel-knop avatar instellen

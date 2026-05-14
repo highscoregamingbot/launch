@@ -1698,6 +1698,7 @@ function loadUnityGame(gameId) {
       .then(instance => {
         unityInstance = instance;
         instance.SendMessage("TelegramParams", "SetTelegramUserData", unityData);
+        sessionStartTime = Date.now();
         playBtn.textContent = '⏳ Game starting...';
         setTimeout(() => {
           playBtn.disabled = false;

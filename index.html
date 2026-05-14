@@ -8,7 +8,7 @@
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-:root { --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px); }
+:root { --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px); --topbar-height: 44px; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -36,7 +36,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 #home-header {
   padding: 14px 16px 10px;
-  padding-top: calc(14px + var(--safe-top));
+  padding-top: calc(14px + var(--topbar-height));
   text-align: center;
   background: rgba(0,0,0,0.5);
   border-bottom: 1px solid #f0f4;
@@ -150,7 +150,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 
 #pregame-back {
   padding: 13px 16px;
-  padding-top: calc(13px + var(--safe-top));
+  padding-top: calc(13px + var(--topbar-height));
   cursor: pointer;
   font-size: 12px;
   color: #f0f;
@@ -485,25 +485,35 @@ body.fullscreen #swipe-zone { display: flex; }
   display: block;
 }
 
-/* ===== TOP LOGO BAR (in Telegram fullscreen safe zone) ===== */
+/* ===== TOP LOGO BAR (always visible, in safe zone on fullscreen) ===== */
 #top-logo-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: var(--safe-top);
+  height: var(--topbar-height);
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
   overflow: hidden;
+  background: rgba(10, 0, 20, 0.85);
+  border-bottom: 1px solid #f0f2;
 }
 #top-logo-bar img {
-  height: 70%;
-  max-height: 30px;
+  height: 65%;
+  max-height: 28px;
   object-fit: contain;
   filter: drop-shadow(0 0 5px #f0f6);
+}
+#top-logo-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #f0f;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px #f0f5;
 }
 
 /* ===== PROFILE SCREEN ===== */
@@ -511,7 +521,7 @@ body.fullscreen #swipe-zone { display: flex; }
 
 #profile-back {
   padding: 13px 16px;
-  padding-top: calc(13px + var(--safe-top));
+  padding-top: calc(13px + var(--topbar-height));
   cursor: pointer;
   font-size: 12px;
   color: #f0f;
@@ -898,7 +908,10 @@ body.fullscreen #swipe-zone { display: flex; }
 
 <!-- ALWAYS-VISIBLE TOP LOGO (in Telegram fullscreen header zone) -->
 <div id="top-logo-bar">
-  <img src="logo-header.png" alt="Highscore Gaming" onerror="this.style.display='none'">
+  <img src="logo-header.png" id="top-logo-img" alt=""
+       style="display:none"
+       onload="this.style.display='block';document.getElementById('top-logo-text').style.display='none'">
+  <span id="top-logo-text">HIGHSCORE GAMING</span>
 </div>
 
 <!-- HOME SCREEN -->
@@ -1890,6 +1903,9 @@ function updateSafeArea() {
   const deviceTop  = tg?.safeAreaInset?.top || 0;
   const totalTop   = Math.max(contentTop, deviceTop);
   if (totalTop > 0) document.documentElement.style.setProperty('--safe-top', totalTop + 'px');
+  // topbar-height: always at least 44px, grows with safe-top in fullscreen
+  const topbarH = Math.max(44, totalTop);
+  document.documentElement.style.setProperty('--topbar-height', topbarH + 'px');
 
   const contentBottom = tg?.contentSafeAreaInset?.bottom || 0;
   const deviceBottom  = tg?.safeAreaInset?.bottom || 0;

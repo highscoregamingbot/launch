@@ -1853,6 +1853,13 @@ limitSelect.addEventListener('change', e => {
 // ===== INIT =====
 buildHomeScreen();
 
+// Gamee-stijl: fullscreen + branding
+if (tg) {
+  tg.expand();
+  tg.setHeaderColor('#1a001a');
+  tg.setBackgroundColor('#0a0010');
+}
+
 // Profiel-knop avatar instellen
 if (username) {
   const btnAvatar = document.getElementById('profile-btn-avatar');

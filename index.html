@@ -1085,10 +1085,48 @@ body.fullscreen #swipe-zone { display: flex; }
   <div id="game-grid"></div>
 </div>
 
+<!-- DEV TEST PANEL -->
+<div id="dev-test-btn" onclick="document.getElementById('dev-test-panel').classList.toggle('open')" style="position:fixed;bottom:80px;right:14px;z-index:99999;width:36px;height:36px;border-radius:50%;background:#ff00ff22;border:1px solid #f0f6;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;">🧪</div>
+<div id="dev-test-panel" style="display:none;position:fixed;bottom:124px;right:14px;z-index:99999;background:#0a0018;border:1px solid #f0f5;border-radius:12px;padding:10px;flex-direction:column;gap:6px;min-width:160px;">
+</div>
+<script>
+(function() {
+  const panel = document.getElementById('dev-test-panel');
+  document.getElementById('dev-test-btn').addEventListener('click', function() {
+    const isOpen = panel.style.display === 'flex';
+    panel.style.display = isOpen ? 'none' : 'flex';
+    if (!isOpen && panel.children.length === 0) {
+      Object.entries(GAMES).forEach(([id, game]) => {
+        const btn = document.createElement('button');
+        btn.textContent = game.emoji + ' ' + game.title;
+        btn.style.cssText = 'font-family:Orbitron,sans-serif;font-size:10px;padding:6px 10px;border-radius:7px;border:1px solid #f0f4;background:rgba(255,0,255,0.1);color:#fff;cursor:pointer;text-align:left;';
+        btn.onclick = function() {
+          panel.style.display = 'none';
+          selectedGameId = id;
+          if (loadedGameId && loadedGameId !== id) {
+            const payload = JSON.stringify({ gameId: id, chatId: chatId });
+            const b64 = btoa(payload).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+            window.location.href = 'index.html?startapp=' + b64;
+          } else {
+            showScreen('screen-game');
+            if (!loadedGameId) loadUnityGame(id);
+            applyGameTheme(id);
+            document.body.classList.add('fullscreen');
+            const ov = document.getElementById('ui-overlay');
+            ov.classList.add('hidden');
+            ov.style.display = 'none';
+          }
+        };
+        panel.appendChild(btn);
+      });
+    }
+  });
+})();
+</script>
+
 <!-- PROFILE SCREEN -->
 <div id="screen-profile" class="screen hidden">
   <div id="profile-back">← Back</div>
-  <button id="test-achievement-btn" onclick="(function(){if(telegramId){localStorage.removeItem('achievements_'+telegramId);checkAchievementsAfterGame();}showAchievementToast({icon:'🎮',name:'Achievement unlocked: First Blood'});showAchievementToast({icon:'⭐',name:'+75 XP earned!'});})()" style="position:fixed;top:60px;right:10px;z-index:99999;background:#ff00ff33;color:#fff;border:1px solid #ff00ff;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">🧪 Test</button>
   <div id="profile-scroll">
 
     <!-- Avatar + naam -->
@@ -1971,8 +2009,6 @@ function loadUnityGame(gameId) {
   const playBtn = document.getElementById('play-button');
   const unityData = `${telegramId};${username};${chatId};${firstName};${lastName};${gameId}`;
 
-  applyGameTheme(gameId);
-
   if (game.gameConfig) window.GAME_CONFIG = game.gameConfig;
 
   document.getElementById('start-game-thumb').src = game.thumbnail;
@@ -2028,6 +2064,7 @@ document.getElementById('play-button').addEventListener('click', async () => {
       lastKnownXp = d.xp?.total ?? null;
     }
   } catch(e) {}
+  applyGameTheme(loadedGameId);
   const overlay = document.getElementById('ui-overlay');
   overlay.classList.add('hidden');
   document.body.classList.add('fullscreen');

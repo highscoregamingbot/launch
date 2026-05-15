@@ -536,8 +536,8 @@ body.fullscreen #swipe-zone { display: flex; }
   cursor: pointer;
   font-size: 12px;
   color: #f0f;
-  background: rgba(0,0,0,0.5);
-  border-bottom: 1px solid #f0f3;
+  background: transparent;
+  border-bottom: none;
   flex-shrink: 0;
   letter-spacing: 1px;
 }
@@ -748,6 +748,29 @@ body.fullscreen #swipe-zone { display: flex; }
 .profile-game-row.not-played { opacity: 0.35; }
 
 /* Wallet sectie */
+#wallet-toggle-btn {
+  width: 100%;
+  max-width: 380px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 10px 16px;
+  background: rgba(40,0,80,0.5);
+  border: 1px solid #f0f3;
+  border-radius: 10px;
+  color: #f0f8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.2s, color 0.2s;
+}
+#wallet-toggle-btn:hover { border-color: #f0f; color: #fff; }
+#wallet-toggle-btn.open { border-color: #f0f6; color: #fff; }
+#wallet-toggle-arrow { font-size: 10px; transition: transform 0.3s; }
+#wallet-toggle-btn.open #wallet-toggle-arrow { transform: rotate(180deg); }
+
 #profile-wallet-wrap {
   width: 100%;
   max-width: 380px;
@@ -755,10 +778,11 @@ body.fullscreen #swipe-zone { display: flex; }
   border: 1px solid #f0f3;
   border-radius: 12px;
   padding: 14px;
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 10px;
 }
+#profile-wallet-wrap.open { display: flex; }
 #profile-wallet-group {
   font-size: 10px;
   color: #f0f8;
@@ -1002,7 +1026,10 @@ body.fullscreen #swipe-zone { display: flex; }
     <div id="profile-game-scores"></div>
 
     <!-- Wallet -->
-    <div class="profile-section-title">WALLET</div>
+    <button id="wallet-toggle-btn" onclick="toggleWalletSection()">
+      <span>💳 WALLET</span>
+      <span id="wallet-toggle-arrow">▼</span>
+    </button>
     <div id="profile-wallet-wrap">
       <!-- Group selector -->
       <div id="wallet-group-row">
@@ -1165,14 +1192,45 @@ function checkNewAchievements(data) {
 
 // ===== ACHIEVEMENTS CONFIG =====
 const ACHIEVEMENTS = [
-  { id: 'first_blood',    icon: '🎮', name: 'First Blood',   desc: 'Play 1 game',         check: d => d.total_games_played >= 1 },
-  { id: 'globe_trotter',  icon: '🌍', name: 'Globe Trotter', desc: 'Play 3+ games',        check: d => d.games.filter(g => g.score !== null).length >= 3 },
-  { id: 'completionist',  icon: '🕹️', name: 'Completionist', desc: 'Play all 9 games',     check: d => d.games.filter(g => g.score !== null).length >= 9 },
-  { id: 'pvp_fighter',    icon: '⚔️', name: 'PvP Fighter',   desc: '1+ PvP match',         check: d => d.pvp.total_matches >= 1 },
-  { id: 'pvp_king',       icon: '👑', name: 'PvP King',      desc: '10+ PvP wins',         check: d => d.pvp.wins >= 10 },
-  { id: 'top10',          icon: '🏆', name: 'Top 10',        desc: 'Top 10 global',        check: d => d.games.some(g => g.global_rank !== null && g.global_rank <= 10) },
-  { id: 'elite',          icon: '💎', name: 'Elite',         desc: 'Top 3 global',         check: d => d.games.some(g => g.global_rank !== null && g.global_rank <= 3) },
-  { id: 'champion',       icon: '🥇', name: 'Champion',      desc: '#1 global in any game',check: d => d.games.some(g => g.global_rank === 1) },
+  // 🥇 Eerste plek pakken
+  { id: 'first_throne',    icon: '🥇', name: 'First Throne',   desc: 'Reach #1 once',       check: d => (d.stats?.times_reached_1st || 0) >= 1 },
+  { id: 'throne_keeper',   icon: '👑', name: 'Throne Keeper',  desc: 'Reach #1 ten times',  check: d => (d.stats?.times_reached_1st || 0) >= 10 },
+  { id: 'untouchable',     icon: '🏆', name: 'Untouchable',    desc: 'Reach #1 100 times',  check: d => (d.stats?.times_reached_1st || 0) >= 100 },
+  { id: 'god_mode',        icon: '🌟', name: 'GOD Mode',       desc: 'Reach #1 1000 times', check: d => (d.stats?.times_reached_1st || 0) >= 1000 },
+
+  // 🎮 Games gespeeld
+  { id: 'first_blood',     icon: '🎮', name: 'First Blood',    desc: 'Play 1 game',         check: d => (d.stats?.games_played_total || 0) >= 1 },
+  { id: 'regular',         icon: '🎯', name: 'Regular',        desc: 'Play 50 games',       check: d => (d.stats?.games_played_total || 0) >= 50 },
+  { id: 'grinder',         icon: '🕹️', name: 'Grinder',        desc: 'Play 500 games',      check: d => (d.stats?.games_played_total || 0) >= 500 },
+  { id: 'no_life_games',   icon: '💀', name: 'No Life',        desc: 'Play 5000 games',     check: d => (d.stats?.games_played_total || 0) >= 5000 },
+
+  // ⏱️ Speeltijd
+  { id: 'casual',          icon: '⏱️', name: 'Casual',         desc: '1 hour played',       check: d => (d.stats?.playtime_hours || 0) >= 1 },
+  { id: 'hooked',          icon: '🕰️', name: 'Hooked',         desc: '10 hours played',     check: d => (d.stats?.playtime_hours || 0) >= 10 },
+  { id: 'addicted',        icon: '😵', name: 'Addicted',       desc: '100 hours played',    check: d => (d.stats?.playtime_hours || 0) >= 100 },
+  { id: 'no_life_time',    icon: '☠️', name: 'No Life',        desc: '1000 hours played',   check: d => (d.stats?.playtime_hours || 0) >= 1000 },
+
+  // ⚔️ PvP wins
+  { id: 'pvp_fighter',     icon: '⚔️', name: 'PvP Fighter',   desc: '1 PvP win',            check: d => (d.pvp?.wins || 0) >= 1 },
+  { id: 'brawler',         icon: '🥊', name: 'Brawler',        desc: '25 PvP wins',         check: d => (d.pvp?.wins || 0) >= 25 },
+  { id: 'pvp_king',        icon: '👊', name: 'PvP King',       desc: '100 PvP wins',        check: d => (d.pvp?.wins || 0) >= 100 },
+  { id: 'destroyer',       icon: '💣', name: 'Destroyer',      desc: '500 PvP wins',        check: d => (d.pvp?.wins || 0) >= 500 },
+
+  // 🔥 Dagelijkse streak
+  { id: 'hot_streak',      icon: '🔥', name: 'Hot Streak',     desc: '3 days in a row',     check: d => (d.stats?.streak_days || 0) >= 3 },
+  { id: 'dedicated',       icon: '📅', name: 'Dedicated',      desc: '7 days in a row',     check: d => (d.stats?.streak_days || 0) >= 7 },
+  { id: 'iron_will',       icon: '🏅', name: 'Iron Will',      desc: '30 days in a row',    check: d => (d.stats?.streak_days || 0) >= 30 },
+  { id: 'unstoppable',     icon: '💎', name: 'Unstoppable',    desc: '100 days in a row',   check: d => (d.stats?.streak_days || 0) >= 100 },
+
+  // ⭐ Level
+  { id: 'rising_star',     icon: '⭐', name: 'Rising Star',    desc: 'Reach level 10',      check: d => (d.xp?.level || 1) >= 10 },
+  { id: 'pro',             icon: '💫', name: 'Pro',            desc: 'Reach level 25',      check: d => (d.xp?.level || 1) >= 25 },
+  { id: 'veteran',         icon: '🔱', name: 'Veteran',        desc: 'Reach level 50',      check: d => (d.xp?.level || 1) >= 50 },
+  { id: 'immortal',        icon: '👁️', name: 'Immortal',       desc: 'Reach level 100',     check: d => (d.xp?.level || 1) >= 100 },
+
+  // 🌍 Variatie
+  { id: 'globe_trotter',   icon: '🌍', name: 'Globe Trotter',  desc: 'Play 3 different games', check: d => d.games.filter(g => g.score !== null).length >= 3 },
+  { id: 'completionist',   icon: '🕹️', name: 'Completionist',  desc: 'Play all 9 games',       check: d => d.games.filter(g => g.score !== null).length >= 9 },
 ];
 
 // ===== PROFIEL LADEN =====
@@ -1202,8 +1260,7 @@ async function loadProfile() {
     console.error('Profile load error:', e);
   }
 
-  // Wallet laden
-  loadWallet();
+  // Wallet laadt pas bij klikken op WALLET knop
 }
 
 function renderProfileData(data) {
@@ -1271,6 +1328,14 @@ function renderProfileData(data) {
 function showProfile() {
   showScreen('screen-profile');
   loadProfile();
+}
+
+function toggleWalletSection() {
+  const btn = document.getElementById('wallet-toggle-btn');
+  const wrap = document.getElementById('profile-wallet-wrap');
+  const isOpen = btn.classList.toggle('open');
+  wrap.classList.toggle('open', isOpen);
+  if (isOpen && !walletGroups.length) loadWallet();
 }
 
 // ===== WALLET =====
@@ -1840,14 +1905,23 @@ function openOverlay() {
 }
 
 // ===== GAME OVER HOOK =====
+async function checkAchievementsAfterGame() {
+  if (!telegramId) return;
+  try {
+    const res = await fetch(`${baseURL}/user_profile/${telegramId}`);
+    const data = await res.json();
+    checkNewAchievements(data);
+  } catch(e) {}
+}
+
 window.onGameOver = function() {
-  // XP voor speeltijd
   if (sessionStartTime && telegramId) {
     const minutesPlayed = (Date.now() - sessionStartTime) / 60000;
     const xpEarned = Math.max(1, Math.floor(minutesPlayed * 50));
     awardXp(xpEarned, 'playtime', selectedGameId);
     sessionStartTime = null;
   }
+  checkAchievementsAfterGame();
   setTimeout(() => {
     if (selectedGameId) selectGame(selectedGameId);
   }, 1500);

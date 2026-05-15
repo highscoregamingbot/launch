@@ -1784,6 +1784,7 @@ const GAMES = {
     title: "Brick Breaker",
     thumbnail: "thumbnails/brickbreaker.gif",
     emoji: "🧱",
+    headerTheme: { bg: '#000000', text: '#ffffff', glow: false },
     loaderUrl: "/brickbreaker/Build/brickbreaker.loader.js",
     config: {
       dataUrl: "/brickbreaker/Build/brickbreaker.data",
@@ -1797,6 +1798,7 @@ const GAMES = {
     title: "Oldman Rush",
     thumbnail: "thumbnails/oldmanrush.gif",
     emoji: "🏃",
+    headerTheme: { bg: '#94D6FC', text: '#000000', glow: false },
     loaderUrl: "/oldmanrush/Build/oldmanrush.loader.js",
     config: {
       dataUrl: "/oldmanrush/Build/oldmanrush.data",
@@ -1810,6 +1812,7 @@ const GAMES = {
     title: "Helix Jump 3D",
     thumbnail: "thumbnails/helixjump.gif",
     emoji: "🌀",
+    unityFullscreen: true,
     loaderUrl: "/helixjump/Build/helixjump.loader.js",
     config: {
       dataUrl: "/helixjump/Build/helixjump.data",
@@ -1823,6 +1826,7 @@ const GAMES = {
     title: "Hopper",
     thumbnail: "thumbnails/hopper.gif",
     emoji: "🐸",
+    unityFullscreen: true,
     loaderUrl: "/hopper/Build/hopper.loader.js",
     config: {
       dataUrl: "/hopper/Build/hopper.data",
@@ -1836,6 +1840,7 @@ const GAMES = {
     title: "Buddy",
     thumbnail: "thumbnails/buddy.gif",
     emoji: "🤖",
+    unityFullscreen: true,
     loaderUrl: "/buddy/Build/buddy.loader.js",
     config: {
       dataUrl: "/buddy/Build/buddy.data",
@@ -2181,6 +2186,7 @@ document.addEventListener('touchend', e => {
 
   if (delta > window.innerHeight * 0.25) {
     // Genoeg gesleept → snap open
+    sendPlaytimeXp();
     ov.classList.remove('hidden');
     ov.style.transition = 'transform 0.35s ease';
     ov.style.transform = 'translateY(0px)';
@@ -2231,6 +2237,7 @@ document.addEventListener('mouseup', e => {
   const ov = document.getElementById('ui-overlay');
 
   if (delta > window.innerHeight * 0.25) {
+    sendPlaytimeXp();
     ov.classList.remove('hidden');
     ov.style.transition = 'transform 0.35s ease';
     ov.style.transform = 'translateY(0px)';
@@ -2289,6 +2296,7 @@ function closeOverlay() {
 
 
 function openOverlay() {
+  sendPlaytimeXp();
   const overlay = document.getElementById('ui-overlay');
   document.body.classList.remove('fullscreen');
   document.body.classList.remove('game-playing');
@@ -2358,13 +2366,16 @@ function _closeAchModalBtn() {
   document.getElementById('ach-modal-backdrop').classList.remove('open');
 }
 
+function sendPlaytimeXp() {
+  if (!sessionStartTime || !telegramId) return;
+  const minutesPlayed = Math.min(30, (Date.now() - sessionStartTime) / 60000);
+  const xpEarned = Math.max(1, Math.floor(minutesPlayed * 50));
+  awardXp(xpEarned, 'playtime', selectedGameId);
+  sessionStartTime = null;
+}
+
 window.onGameOver = function() {
-  if (sessionStartTime && telegramId) {
-    const minutesPlayed = Math.min(30, (Date.now() - sessionStartTime) / 60000);
-    const xpEarned = Math.max(1, Math.floor(minutesPlayed * 50));
-    awardXp(xpEarned, 'playtime', selectedGameId);
-    sessionStartTime = null;
-  }
+  sendPlaytimeXp();
   checkAchievementsAfterGame();
   setTimeout(() => {
     if (selectedGameId) selectGame(selectedGameId);
@@ -2382,6 +2393,7 @@ document.getElementById('profile-back').addEventListener('click', () => {
 });
 
 document.getElementById('game-back').addEventListener('click', () => {
+  sendPlaytimeXp();
   stopAchievementPolling();
   resetGameTheme();
   const overlay = document.getElementById('ui-overlay');

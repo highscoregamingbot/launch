@@ -1318,18 +1318,22 @@ function checkNewAchievements(data) {
     localStorage.setItem(key, JSON.stringify(stored));
     newlyUnlocked.forEach(ach => {
       showAchievementToast(ach);
-      awardXp(150, 'achievement', '');
+      awardXp(ach.xp ?? 150, 'achievement', '');
     });
   }
 }
 
 // ===== ACHIEVEMENTS CONFIG =====
 const ACHIEVEMENTS = [
-  // 🥇 Eerste plek pakken
-  { id: 'first_throne',    icon: '🥇', name: 'First Throne',   desc: 'Reach #1 once',       check: d => (d.stats?.times_reached_1st || 0) >= 1 },
-  { id: 'throne_keeper',   icon: '👑', name: 'Throne Keeper',  desc: 'Reach #1 ten times',  check: d => (d.stats?.times_reached_1st || 0) >= 10 },
-  { id: 'untouchable',     icon: '🏆', name: 'Untouchable',    desc: 'Reach #1 100 times',  check: d => (d.stats?.times_reached_1st || 0) >= 100 },
-  { id: 'god_mode',        icon: '🌟', name: 'GOD Mode',       desc: 'Reach #1 1000 times', check: d => (d.stats?.times_reached_1st || 0) >= 1000 },
+  // 🥇 #1 tiers
+  { id: 'throne_1',    icon: '🥇', name: 'First Throne', desc: 'Reach #1 once',        xp: 200,   check: d => (d.stats?.times_reached_1st || 0) >= 1 },
+  { id: 'throne_5',    icon: '🏆', name: 'Top Dog',      desc: 'Reach #1 five times',  xp: 300,   check: d => (d.stats?.times_reached_1st || 0) >= 5 },
+  { id: 'throne_10',   icon: '👑', name: 'King',         desc: 'Reach #1 ten times',   xp: 500,   check: d => (d.stats?.times_reached_1st || 0) >= 10 },
+  { id: 'throne_25',   icon: '💪', name: 'Dominator',    desc: 'Reach #1 25 times',    xp: 750,   check: d => (d.stats?.times_reached_1st || 0) >= 25 },
+  { id: 'throne_50',   icon: '🌟', name: 'Supreme',      desc: 'Reach #1 50 times',    xp: 1500,  check: d => (d.stats?.times_reached_1st || 0) >= 50 },
+  { id: 'throne_100',  icon: '🔱', name: 'Untouchable',  desc: 'Reach #1 100 times',   xp: 3000,  check: d => (d.stats?.times_reached_1st || 0) >= 100 },
+  { id: 'throne_250',  icon: '💎', name: 'Legendary',    desc: 'Reach #1 250 times',   xp: 7500,  check: d => (d.stats?.times_reached_1st || 0) >= 250 },
+  { id: 'throne_1000', icon: '🛸', name: 'GOD Mode',     desc: 'Reach #1 1000 times',  xp: 25000, check: d => (d.stats?.times_reached_1st || 0) >= 1000 },
 
   // 🎮 Games gespeeld
   { id: 'first_blood',     icon: '🎮', name: 'First Blood',    desc: 'Play 1 game',         check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 1 },

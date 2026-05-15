@@ -18,7 +18,7 @@
 
 body {
   font-family: 'Orbitron', sans-serif;
-  background: radial-gradient(ellipse at top, #1a001a 0%, #0a0010 100%);
+  background: #060008;
   color: #fff;
   height: 100vh;
   overflow: hidden;
@@ -26,10 +26,65 @@ body {
 
 html, body { height: 100%; width: 100%; overflow: hidden; }
 
+/* ===== BACKGROUND ORBS ===== */
+#bg-orbs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+}
+#orb1 {
+  width: 340px; height: 340px;
+  background: radial-gradient(circle, #dd00ff 0%, transparent 70%);
+  top: -100px; left: -80px;
+  opacity: 0.85;
+  animation: orbDrift1 13s ease-in-out infinite alternate;
+}
+#orb2 {
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, #0055ff 0%, transparent 70%);
+  top: 20%; right: -90px;
+  opacity: 0.8;
+  animation: orbDrift2 16s ease-in-out infinite alternate;
+}
+#orb3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, #ff00cc 0%, transparent 70%);
+  bottom: 5%; left: -60px;
+  opacity: 0.75;
+  animation: orbDrift3 14s ease-in-out infinite alternate;
+}
+#orb4 {
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, #00ccff 0%, transparent 70%);
+  bottom: -70px; right: -30px;
+  opacity: 0.75;
+  animation: orbDrift4 11s ease-in-out infinite alternate;
+}
+#orb5 {
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, #8800ff 0%, transparent 70%);
+  top: 42%; left: 25%;
+  opacity: 0.65;
+  animation: orbDrift5 18s ease-in-out infinite alternate;
+}
+@keyframes orbDrift1 { to { transform: translate(45px, 65px); } }
+@keyframes orbDrift2 { to { transform: translate(-55px, 45px); } }
+@keyframes orbDrift3 { to { transform: translate(65px, -55px); } }
+@keyframes orbDrift4 { to { transform: translate(-45px, -65px); } }
+@keyframes orbDrift5 { to { transform: translate(-25px, 35px) scale(1.15); } }
+
 /* ===== SCREENS ===== */
 .screen {
   position: fixed;
   inset: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -43,8 +98,8 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
   padding: 14px 16px 10px;
   padding-top: calc(14px + var(--content-top));
   text-align: center;
-  background: rgba(0,0,0,0.5);
-  border-bottom: 1px solid #f0f4;
+  background: rgba(6,0,12,0.6);
+  border-bottom: 1px solid #f0f3;
   flex-shrink: 0;
 }
 
@@ -151,7 +206,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 }
 
 /* ===== PRE-GAME SCREEN ===== */
-#screen-pregame { background: rgba(10, 0, 20, 0.98); }
+#screen-pregame { background: rgba(6, 0, 12, 0.75); }
 
 #pregame-back {
   padding: 13px 16px;
@@ -159,7 +214,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
   cursor: pointer;
   font-size: 12px;
   color: #f0f;
-  background: rgba(0,0,0,0.5);
+  background: transparent;
   border-bottom: 1px solid #f0f3;
   flex-shrink: 0;
   letter-spacing: 1px;
@@ -991,6 +1046,15 @@ body.fullscreen #swipe-zone { display: flex; }
   </style>
 </head>
 <body>
+
+<!-- BACKGROUND ORBS -->
+<div id="bg-orbs" aria-hidden="true">
+  <div class="bg-orb" id="orb1"></div>
+  <div class="bg-orb" id="orb2"></div>
+  <div class="bg-orb" id="orb3"></div>
+  <div class="bg-orb" id="orb4"></div>
+  <div class="bg-orb" id="orb5"></div>
+</div>
 
 <!-- TOP LOGO BAR -->
 <div id="top-logo-bar">

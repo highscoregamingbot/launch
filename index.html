@@ -1186,7 +1186,10 @@ function checkNewAchievements(data) {
   });
   if (newlyUnlocked.length > 0) {
     localStorage.setItem(key, JSON.stringify(stored));
-    newlyUnlocked.forEach(ach => showAchievementToast(ach));
+    newlyUnlocked.forEach(ach => {
+      showAchievementToast(ach);
+      awardXp(150, 'achievement', '');
+    });
   }
 }
 
@@ -1916,8 +1919,8 @@ async function checkAchievementsAfterGame() {
 
 window.onGameOver = function() {
   if (sessionStartTime && telegramId) {
-    const minutesPlayed = (Date.now() - sessionStartTime) / 60000;
-    const xpEarned = Math.max(1, Math.floor(minutesPlayed * 50));
+    const minutesPlayed = Math.min(30, (Date.now() - sessionStartTime) / 60000);
+    const xpEarned = Math.max(1, Math.floor(minutesPlayed * 10));
     awardXp(xpEarned, 'playtime', selectedGameId);
     sessionStartTime = null;
   }

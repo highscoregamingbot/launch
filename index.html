@@ -1952,6 +1952,18 @@ function loadUnityGame(gameId) {
 }
 
 // ===== PLAY BUTTON =====
+let achievementPollInterval = null;
+
+function startAchievementPolling() {
+  if (achievementPollInterval) return;
+  achievementPollInterval = setInterval(checkAchievementsAfterGame, 60000);
+}
+
+function stopAchievementPolling() {
+  clearInterval(achievementPollInterval);
+  achievementPollInterval = null;
+}
+
 document.getElementById('play-button').addEventListener('click', () => {
   if (!isLoaded) return;
   sessionStartTime = Date.now();
@@ -1959,6 +1971,7 @@ document.getElementById('play-button').addEventListener('click', () => {
   overlay.classList.add('hidden');
   document.body.classList.add('fullscreen');
   setTimeout(() => { overlay.style.display = 'none'; }, 600);
+  startAchievementPolling();
 });
 
 // ===== SWIPE ZONE boven Unity canvas =====
@@ -2100,6 +2113,7 @@ function openOverlay() {
   overlay.offsetHeight; // force reflow
   overlay.style.transition = '';
   overlay.style.transform = ''; // slide omhoog
+  checkAchievementsAfterGame();
 }
 
 // ===== GAME OVER HOOK =====
@@ -2136,7 +2150,7 @@ document.getElementById('profile-back').addEventListener('click', () => {
 });
 
 document.getElementById('game-back').addEventListener('click', () => {
-  // Restore overlay for when user comes back to game screen
+  stopAchievementPolling();
   const overlay = document.getElementById('ui-overlay');
   overlay.style.display = '';
   overlay.classList.remove('hidden');

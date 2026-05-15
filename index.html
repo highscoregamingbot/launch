@@ -98,10 +98,8 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
   padding: 14px 16px 10px;
   padding-top: calc(14px + var(--content-top));
   text-align: center;
-  background: rgba(6,0,12,0.75);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid #f0f3;
+  background: transparent;
+  border-bottom: none;
   flex-shrink: 0;
   position: relative;
   z-index: 2;
@@ -210,7 +208,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
 }
 
 /* ===== PRE-GAME SCREEN ===== */
-#screen-pregame { background: rgba(6, 0, 12, 0.75); }
+#screen-pregame { background: transparent; }
 
 #pregame-back {
   padding: 13px 16px;
@@ -340,7 +338,11 @@ body.fullscreen #unity-container {
   z-index: 10;
   display: flex;
   flex-direction: column;
-  background: rgba(30, 0, 60, 0.6);
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(180,0,255,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 80% 70%, rgba(0,80,255,0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 45% 30% at 60% 10%, rgba(255,0,200,0.12) 0%, transparent 70%),
+    rgba(6, 0, 20, 0.75);
   backdrop-filter: blur(8px);
   transition: transform 0.4s ease;
 }
@@ -619,29 +621,31 @@ body.fullscreen #swipe-zone { display: flex; }
 #screen-profile { overflow: hidden; }
 
 #profile-back {
+  position: absolute;
+  top: 0; left: 0; right: 0;
   padding: 13px 16px;
   padding-top: calc(13px + var(--content-top));
   cursor: pointer;
   font-size: 12px;
   color: #f0f;
-  background: rgba(6, 0, 12, 0.75);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: transparent;
   border-bottom: none;
-  flex-shrink: 0;
   letter-spacing: 1px;
-  position: relative;
   z-index: 2;
 }
 #profile-back:hover { color: #fff; }
 
 #profile-scroll {
-  flex: 1;
+  position: absolute;
+  inset: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 14px 32px;
+  padding-top: calc(46px + var(--content-top));
+  padding-bottom: 32px;
+  padding-left: 14px;
+  padding-right: 14px;
   gap: 16px;
 }
 

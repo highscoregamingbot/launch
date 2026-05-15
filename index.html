@@ -1304,10 +1304,10 @@ const ACHIEVEMENTS = [
   { id: 'god_mode',        icon: '🌟', name: 'GOD Mode',       desc: 'Reach #1 1000 times', check: d => (d.stats?.times_reached_1st || 0) >= 1000 },
 
   // 🎮 Games gespeeld
-  { id: 'first_blood',     icon: '🎮', name: 'First Blood',    desc: 'Play 1 game',         check: d => (d.stats?.games_played_total || 0) >= 1 },
-  { id: 'regular',         icon: '🎯', name: 'Regular',        desc: 'Play 50 games',       check: d => (d.stats?.games_played_total || 0) >= 50 },
-  { id: 'grinder',         icon: '🕹️', name: 'Grinder',        desc: 'Play 500 games',      check: d => (d.stats?.games_played_total || 0) >= 500 },
-  { id: 'no_life_games',   icon: '💀', name: 'No Life',        desc: 'Play 5000 games',     check: d => (d.stats?.games_played_total || 0) >= 5000 },
+  { id: 'first_blood',     icon: '🎮', name: 'First Blood',    desc: 'Play 1 game',         check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 1 },
+  { id: 'regular',         icon: '🎯', name: 'Regular',        desc: 'Play 50 games',       check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 50 },
+  { id: 'grinder',         icon: '🕹️', name: 'Grinder',        desc: 'Play 500 games',      check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 500 },
+  { id: 'no_life_games',   icon: '💀', name: 'No Life',        desc: 'Play 5000 games',     check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 5000 },
 
   // ⏱️ Speeltijd
   { id: 'casual',          icon: '⏱️', name: 'Casual',         desc: '1 hour played',       check: d => (d.stats?.playtime_hours || 0) >= 1 },

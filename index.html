@@ -1996,6 +1996,7 @@ document.addEventListener('touchend', e => {
 
   if (delta > window.innerHeight * 0.25) {
     // Genoeg gesleept → snap open
+    ov.classList.remove('hidden');
     ov.style.transition = 'transform 0.35s ease';
     ov.style.transform = 'translateY(0px)';
     document.body.classList.remove('fullscreen');
@@ -2039,6 +2040,7 @@ document.addEventListener('mouseup', e => {
   const ov = document.getElementById('ui-overlay');
 
   if (delta > window.innerHeight * 0.25) {
+    ov.classList.remove('hidden');
     ov.style.transition = 'transform 0.35s ease';
     ov.style.transform = 'translateY(0px)';
     document.body.classList.remove('fullscreen');

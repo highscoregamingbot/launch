@@ -615,6 +615,23 @@ body.fullscreen #swipe-zone { display: flex; }
     drop-shadow(0 0 3px rgba(255,0,255,0.5))
     drop-shadow(0 0 8px rgba(255,0,255,0.25));
 }
+body.game-playing #top-logo-text {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: var(--game-text-color, #ffffff) !important;
+  color: var(--game-text-color, #ffffff) !important;
+  filter: none !important;
+}
+body.game-playing #top-logo-bar {
+  background: var(--game-theme-bg, transparent) !important;
+}
+body.game-playing {
+  background: var(--game-theme-bg, #060008) !important;
+}
+body.game-playing #bg-orbs {
+  display: none !important;
+}
 
 /* ===== PROFILE SCREEN ===== */
 #screen-profile { overflow: hidden; }
@@ -1088,7 +1105,6 @@ body.fullscreen #swipe-zone { display: flex; }
 <!-- PROFILE SCREEN -->
 <div id="screen-profile" class="screen hidden">
   <div id="profile-back">← Back</div>
-  <button id="test-achievement-btn" onclick="(function(){if(telegramId){localStorage.removeItem('achievements_'+telegramId);checkAchievementsAfterGame();}showAchievementToast({icon:'🎮',name:'Achievement unlocked: First Blood'});showAchievementToast({icon:'⭐',name:'+75 XP earned!'});})()" style="position:fixed;top:60px;right:10px;z-index:99999;background:#ff00ff33;color:#fff;border:1px solid #ff00ff;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">🧪 Test</button>
   <div id="profile-scroll">
 
     <!-- Avatar + naam -->
@@ -1923,20 +1939,23 @@ function applyGameTheme(gameId) {
   const game = GAMES[gameId];
   const theme = game?.headerTheme;
   const bar = document.getElementById('top-logo-bar');
-  const text = document.getElementById('top-logo-text');
   const container = document.getElementById('unity-container');
 
   if (theme) {
     const bg = theme.bg || 'transparent';
+    const textColor = theme.text || '#ffffff';
+    document.documentElement.style.setProperty('--game-theme-bg', bg);
+    document.documentElement.style.setProperty('--game-text-color', textColor);
     bar.style.background = bg;
     document.body.style.background = bg;
     tg?.setBackgroundColor?.(bg);
     tg?.setHeaderColor?.(bg);
-    text.style.background = 'none';
-    text.style.webkitBackgroundClip = '';
-    text.style.backgroundClip = '';
-    text.style.webkitTextFillColor = theme.text || '#fff';
-    text.style.filter = theme.glow === false ? 'none' : '';
+    document.body.classList.add('game-playing');
+  } else {
+    document.documentElement.style.removeProperty('--game-theme-bg');
+    document.documentElement.style.removeProperty('--game-text-color');
+    bar.style.background = '';
+    document.body.classList.remove('game-playing');
   }
 
   if (game?.unityFullscreen) {
@@ -1947,19 +1966,14 @@ function applyGameTheme(gameId) {
 }
 
 function resetGameTheme() {
-  const bar = document.getElementById('top-logo-bar');
-  const text = document.getElementById('top-logo-text');
-  const container = document.getElementById('unity-container');
-  bar.style.background = '';
+  document.body.classList.remove('game-playing');
+  document.documentElement.style.removeProperty('--game-theme-bg');
+  document.documentElement.style.removeProperty('--game-text-color');
+  document.getElementById('top-logo-bar').style.background = '';
   document.body.style.background = '';
   tg?.setBackgroundColor?.('#0a0010');
   tg?.setHeaderColor?.('#1a001a');
-  text.style.background = '';
-  text.style.webkitBackgroundClip = '';
-  text.style.backgroundClip = '';
-  text.style.webkitTextFillColor = '';
-  text.style.filter = '';
-  container.style.top = '';
+  document.getElementById('unity-container').style.top = '';
 }
 
 function loadUnityGame(gameId) {
@@ -1970,8 +1984,6 @@ function loadUnityGame(gameId) {
   const canvas = document.getElementById('unity-canvas');
   const playBtn = document.getElementById('play-button');
   const unityData = `${telegramId};${username};${chatId};${firstName};${lastName};${gameId}`;
-
-  applyGameTheme(gameId);
 
   if (game.gameConfig) window.GAME_CONFIG = game.gameConfig;
 
@@ -2009,7 +2021,8 @@ let achievementPollInterval = null;
 
 function startAchievementPolling() {
   if (achievementPollInterval) return;
-  achievementPollInterval = setInterval(checkAchievementsAfterGame, 60000);
+  setTimeout(checkAchievementsAfterGame, 5000);
+  achievementPollInterval = setInterval(checkAchievementsAfterGame, 15000);
 }
 
 function stopAchievementPolling() {
@@ -2028,6 +2041,7 @@ document.getElementById('play-button').addEventListener('click', async () => {
       lastKnownXp = d.xp?.total ?? null;
     }
   } catch(e) {}
+  applyGameTheme(loadedGameId);
   const overlay = document.getElementById('ui-overlay');
   overlay.classList.add('hidden');
   document.body.classList.add('fullscreen');
@@ -2074,7 +2088,13 @@ document.addEventListener('touchend', e => {
     ov.style.transition = 'transform 0.35s ease';
     ov.style.transform = 'translateY(0px)';
     document.body.classList.remove('fullscreen');
+    document.body.classList.remove('game-playing');
+    document.getElementById('top-logo-bar').style.background = '';
+    document.body.style.background = '';
+    tg?.setBackgroundColor?.('#0a0010');
+    tg?.setHeaderColor?.('#1a001a');
     setTimeout(() => { ov.style.transition = ''; ov.style.transform = ''; }, 350);
+    checkAchievementsAfterGame();
   } else {
     // Te weinig → snap terug dicht
     ov.style.transition = 'transform 0.35s ease';
@@ -2118,7 +2138,13 @@ document.addEventListener('mouseup', e => {
     ov.style.transition = 'transform 0.35s ease';
     ov.style.transform = 'translateY(0px)';
     document.body.classList.remove('fullscreen');
+    document.body.classList.remove('game-playing');
+    document.getElementById('top-logo-bar').style.background = '';
+    document.body.style.background = '';
+    tg?.setBackgroundColor?.('#0a0010');
+    tg?.setHeaderColor?.('#1a001a');
     setTimeout(() => { ov.style.transition = ''; ov.style.transform = ''; }, 350);
+    checkAchievementsAfterGame();
   } else {
     ov.style.transition = 'transform 0.35s ease';
     ov.style.transform = `translateY(${window.innerHeight}px)`;
@@ -2161,19 +2187,25 @@ function closeOverlay() {
   overlay.classList.add('hidden');
   document.body.classList.add('fullscreen');
   setTimeout(() => { overlay.style.display = 'none'; }, 400);
+  if (GAMES[loadedGameId]?.headerTheme) document.body.classList.add('game-playing');
 }
 
 
 function openOverlay() {
   const overlay = document.getElementById('ui-overlay');
   document.body.classList.remove('fullscreen');
-  overlay.classList.remove('hidden'); // anders trekt .hidden { transform } hem terug omlaag
+  document.body.classList.remove('game-playing');
+  document.getElementById('top-logo-bar').style.background = '';
+  document.body.style.background = '';
+  tg?.setBackgroundColor?.('#0a0010');
+  tg?.setHeaderColor?.('#1a001a');
+  overlay.classList.remove('hidden');
   overlay.style.display = '';
   overlay.style.transition = 'none';
   overlay.style.transform = 'translateY(100%)';
   overlay.offsetHeight; // force reflow
   overlay.style.transition = '';
-  overlay.style.transform = ''; // slide omhoog
+  overlay.style.transform = '';
   checkAchievementsAfterGame();
 }
 

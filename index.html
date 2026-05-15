@@ -612,9 +612,8 @@ body.fullscreen #swipe-zone { display: flex; }
   -webkit-text-fill-color: transparent;
   background-clip: text;
   filter:
-    drop-shadow(0 0 6px rgba(255,0,255,0.95))
-    drop-shadow(0 0 16px rgba(255,0,255,0.6))
-    drop-shadow(0 0 32px rgba(0,240,255,0.4));
+    drop-shadow(0 0 3px rgba(255,0,255,0.5))
+    drop-shadow(0 0 8px rgba(255,0,255,0.25));
 }
 
 /* ===== PROFILE SCREEN ===== */
@@ -1037,22 +1036,24 @@ body.fullscreen #swipe-zone { display: flex; }
 /* Achievement toast */
 #achievement-toast {
   position: fixed;
-  bottom: 130px;
+  top: var(--safe-top, 0px);
   left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: linear-gradient(135deg, #0af, #06f);
+  transform: translateX(-50%) translateY(-100%);
+  background: linear-gradient(135deg, #00aaff, #0066ff);
   color: #fff;
   font-family: 'Orbitron', sans-serif;
-  font-size: 12px;
+  font-size: 9px;
   font-weight: 700;
-  padding: 10px 20px;
-  border-radius: 20px;
-  box-shadow: 0 0 20px #0af8;
+  padding: 2px 12px;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 2px 10px #0af6;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s, transform 0.4s;
-  z-index: 9999;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 99999;
   white-space: nowrap;
+  height: 20px;
+  line-height: 16px;
 }
 #achievement-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
@@ -1087,6 +1088,7 @@ body.fullscreen #swipe-zone { display: flex; }
 <!-- PROFILE SCREEN -->
 <div id="screen-profile" class="screen hidden">
   <div id="profile-back">← Back</div>
+  <button id="test-achievement-btn" onclick="(function(){if(telegramId){localStorage.removeItem('achievements_'+telegramId);checkAchievementsAfterGame();}showAchievementToast({icon:'🎮',name:'Achievement unlocked: First Blood'});showAchievementToast({icon:'⭐',name:'+75 XP earned!'});})()" style="position:fixed;top:60px;right:10px;z-index:99999;background:#ff00ff33;color:#fff;border:1px solid #ff00ff;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;">🧪 Test</button>
   <div id="profile-scroll">
 
     <!-- Avatar + naam -->
@@ -1251,7 +1253,7 @@ function getLevelTitle(level) {
 
 function showLevelUpToast(level) {
   const toast = document.getElementById('levelup-toast');
-  toast.textContent = `⬆️ Level up! Je bent nu level ${level} · ${getLevelTitle(level)}`;
+  toast.textContent = `⬆️ Level up! You are now level ${level} · ${getLevelTitle(level)}`;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3500);
 }
@@ -1623,6 +1625,7 @@ async function confirmManualGroup() {
 
 // ===== XP AWARD =====
 let sessionStartTime = null;
+let lastKnownXp = null;
 
 async function awardXp(xp, reason, game_id = '') {
   if (!telegramId) return null;
@@ -1922,7 +1925,11 @@ function applyGameTheme(gameId) {
   const container = document.getElementById('unity-container');
 
   if (theme) {
-    bar.style.background = theme.bg || 'transparent';
+    const bg = theme.bg || 'transparent';
+    bar.style.background = bg;
+    document.body.style.background = bg;
+    tg?.setBackgroundColor?.(bg);
+    tg?.setHeaderColor?.(bg);
     text.style.background = 'none';
     text.style.webkitBackgroundClip = '';
     text.style.backgroundClip = '';
@@ -1930,7 +1937,6 @@ function applyGameTheme(gameId) {
     text.style.filter = theme.glow === false ? 'none' : '';
   }
 
-  // Unity container top: 0 als fullscreen game, anders onder logo bar
   if (game?.unityFullscreen) {
     container.style.top = '0';
   } else {
@@ -1943,6 +1949,9 @@ function resetGameTheme() {
   const text = document.getElementById('top-logo-text');
   const container = document.getElementById('unity-container');
   bar.style.background = '';
+  document.body.style.background = '';
+  tg?.setBackgroundColor?.('#0a0010');
+  tg?.setHeaderColor?.('#1a001a');
   text.style.background = '';
   text.style.webkitBackgroundClip = '';
   text.style.backgroundClip = '';
@@ -2006,9 +2015,17 @@ function stopAchievementPolling() {
   achievementPollInterval = null;
 }
 
-document.getElementById('play-button').addEventListener('click', () => {
+document.getElementById('play-button').addEventListener('click', async () => {
   if (!isLoaded) return;
   sessionStartTime = Date.now();
+  // Sla huidige XP op als baseline zodat we na het spelen de winst kunnen tonen
+  try {
+    if (telegramId) {
+      const r = await fetch(`${baseURL}/user_profile/${telegramId}`);
+      const d = await r.json();
+      lastKnownXp = d.xp?.total ?? null;
+    }
+  } catch(e) {}
   const overlay = document.getElementById('ui-overlay');
   overlay.classList.add('hidden');
   document.body.classList.add('fullscreen');
@@ -2165,6 +2182,15 @@ async function checkAchievementsAfterGame() {
     const res = await fetch(`${baseURL}/user_profile/${telegramId}`);
     const data = await res.json();
     checkNewAchievements(data);
+    // Toon XP-gain toast als XP gestegen is sinds game start
+    const newXp = data.xp?.total ?? null;
+    if (lastKnownXp !== null && newXp !== null && newXp > lastKnownXp) {
+      const gained = newXp - lastKnownXp;
+      showAchievementToast({ icon: '⭐', name: `+${gained} XP earned!` });
+      lastKnownXp = newXp;
+    } else if (newXp !== null && lastKnownXp === null) {
+      lastKnownXp = newXp;
+    }
   } catch(e) {}
 }
 

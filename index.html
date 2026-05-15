@@ -1650,6 +1650,10 @@ async function awardXp(xp, reason, game_id = '') {
     const res = await fetch(`${baseURL}/award_xp`, { method: 'POST', body });
     const data = await res.json();
     if (data.leveled_up) showLevelUpToast(data.level);
+    if (data.xp_gained > 0) {
+      showAchievementToast({ icon: '⭐', name: `+${data.xp_gained} XP earned!` });
+      lastKnownXp = data.total_xp;
+    }
     return data;
   } catch(e) { return null; }
 }
@@ -2354,6 +2358,14 @@ limitSelect.addEventListener('change', e => {
 
 // ===== INIT =====
 buildHomeScreen();
+
+// Sla baseline XP op bij startup zodat polls correcte winst berekenen
+if (telegramId) {
+  fetch(`${baseURL}/user_profile/${telegramId}`)
+    .then(r => r.json())
+    .then(d => { if (lastKnownXp === null) lastKnownXp = d.xp?.total ?? null; })
+    .catch(() => {});
+}
 
 // Gamee-stijl: fullscreen + branding
 function updateSafeArea() {

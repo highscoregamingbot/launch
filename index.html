@@ -268,7 +268,7 @@ html, body { height: 100%; width: 100%; overflow: hidden; }
   z-index: 0;
 }
 body.fullscreen #unity-container {
-  bottom: calc(28px + var(--safe-bottom));
+  bottom: 0;
 }
 #unity-canvas {
   width: 100%; height: 100%;
@@ -293,8 +293,8 @@ body.fullscreen #unity-container {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  background: rgba(0,0,0,0.6);
-  border-bottom: 2px solid #222;
+  background: transparent;
+  border-bottom: 1px solid #f0f3;
 }
 
 .tab-back {
@@ -482,7 +482,7 @@ body.fullscreen .ui-overlay { transform: translateY(100%); }
   z-index: 50;
   align-items: center;
   justify-content: center;
-  cursor: n-resize;
+  pointer-events: none;
 }
 body.fullscreen #swipe-zone { display: flex; }
 
@@ -1888,17 +1888,105 @@ document.getElementById('play-button').addEventListener('click', () => {
 // ===== SWIPE ZONE boven Unity canvas =====
 const swipeZone = document.getElementById('swipe-zone');
 let dragStartY = 0;
+let isDragging = false;
 
-// Swipe omhoog → menu openen
-swipeZone.addEventListener('touchstart', e => { dragStartY = e.touches[0].clientY; }, { passive: true });
-swipeZone.addEventListener('touchend', e => {
-  if (dragStartY - e.changedTouches[0].clientY > 30) openOverlay();
-}, { passive: true });
-
-swipeZone.addEventListener('mousedown', e => { dragStartY = e.clientY; });
-document.addEventListener('mouseup', e => {
+// Touch start — begin drag als vanuit onderkant 60px
+document.addEventListener('touchstart', e => {
   if (!document.body.classList.contains('fullscreen')) return;
-  if (dragStartY && dragStartY - e.clientY > 30) openOverlay();
+  const y = e.touches[0].clientY;
+  if (y < window.innerHeight - 60) return;
+  dragStartY = y;
+  isDragging = true;
+  const ov = document.getElementById('ui-overlay');
+  ov.style.display = '';
+  ov.style.transition = 'none';
+  ov.style.transform = `translateY(${window.innerHeight}px)`;
+}, { passive: true, capture: true });
+
+// Touch move — overlay volgt vinger
+document.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  const delta = Math.max(0, Math.min(window.innerHeight, dragStartY - e.touches[0].clientY));
+  document.getElementById('ui-overlay').style.transform =
+    `translateY(${window.innerHeight - delta}px)`;
+}, { passive: true, capture: true });
+
+// Touch end — snap open of snap terug dicht
+document.addEventListener('touchend', e => {
+  if (!isDragging) return;
+  isDragging = false;
+  const delta = dragStartY - e.changedTouches[0].clientY;
+  const ov = document.getElementById('ui-overlay');
+
+  if (delta > window.innerHeight * 0.25) {
+    // Genoeg gesleept → snap open
+    ov.style.transition = 'transform 0.35s ease';
+    ov.style.transform = 'translateY(0px)';
+    document.body.classList.remove('fullscreen');
+    setTimeout(() => { ov.style.transition = ''; ov.style.transform = ''; }, 350);
+  } else {
+    // Te weinig → snap terug dicht
+    ov.style.transition = 'transform 0.35s ease';
+    ov.style.transform = `translateY(${window.innerHeight}px)`;
+    setTimeout(() => {
+      ov.style.display = 'none';
+      ov.style.transition = '';
+      ov.style.transform = '';
+    }, 350);
+  }
+  dragStartY = 0;
+}, { passive: true, capture: true });
+
+// Mouse version (voor desktop testen)
+document.addEventListener('mousedown', e => {
+  if (!document.body.classList.contains('fullscreen')) return;
+  if (e.clientY < window.innerHeight - 60) return;
+  dragStartY = e.clientY;
+  isDragging = true;
+  const ov = document.getElementById('ui-overlay');
+  ov.style.display = '';
+  ov.style.transition = 'none';
+  ov.style.transform = `translateY(${window.innerHeight}px)`;
+});
+
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const delta = Math.max(0, Math.min(window.innerHeight, dragStartY - e.clientY));
+  document.getElementById('ui-overlay').style.transform =
+    `translateY(${window.innerHeight - delta}px)`;
+});
+
+document.addEventListener('mouseup', e => {
+  if (!isDragging) return;
+  isDragging = false;
+  const delta = dragStartY - e.clientY;
+  const ov = document.getElementById('ui-overlay');
+
+  if (delta > window.innerHeight * 0.25) {
+    ov.style.transition = 'transform 0.35s ease';
+    ov.style.transform = 'translateY(0px)';
+    document.body.classList.remove('fullscreen');
+    setTimeout(() => { ov.style.transition = ''; ov.style.transform = ''; }, 350);
+  } else {
+    ov.style.transition = 'transform 0.35s ease';
+    ov.style.transform = `translateY(${window.innerHeight}px)`;
+    setTimeout(() => {
+      ov.style.display = 'none';
+      ov.style.transition = '';
+      ov.style.transform = '';
+    }, 350);
+  }
+  dragStartY = 0;
+});
+
+// Desktop mouse fallback
+document.addEventListener('mousedown', e => {
+  if (!document.body.classList.contains('fullscreen')) return;
+  if (e.clientY > window.innerHeight - 60) dragStartY = e.clientY;
+});
+document.addEventListener('mouseup', e => {
+  if (!document.body.classList.contains('fullscreen') || !dragStartY) return;
+  if (dragStartY - e.clientY > 30) openOverlay();
   dragStartY = 0;
 });
 

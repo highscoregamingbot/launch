@@ -2356,7 +2356,7 @@ function _closeAchModalBtn() {
 window.onGameOver = function() {
   if (sessionStartTime && telegramId) {
     const minutesPlayed = Math.min(30, (Date.now() - sessionStartTime) / 60000);
-    const xpEarned = Math.max(1, Math.floor(minutesPlayed * 10));
+    const xpEarned = Math.max(1, Math.floor(minutesPlayed * 50));
     awardXp(xpEarned, 'playtime', selectedGameId);
     sessionStartTime = null;
   }

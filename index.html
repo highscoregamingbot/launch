@@ -1641,6 +1641,7 @@ const GAMES = {
     title: "Maze Runner",
     thumbnail: "thumbnails/mazerunner.gif",
     emoji: "🌀",
+    headerTheme: { bg: '#000000', text: '#ffffff', glow: false },
     loaderUrl: "/maze_runner/Build/mazerunnerhsc.loader.js",
     config: {
       dataUrl: "/maze_runner/Build/mazerunnerhsc.data",
@@ -1654,6 +1655,7 @@ const GAMES = {
     title: "Ghosty",
     thumbnail: "thumbnails/ghosty.gif",
     emoji: "👻",
+    unityFullscreen: true,
     loaderUrl: "/ghosty/Build/ghosty.loader.js",
     config: {
       dataUrl: "/ghosty/Build/ghosty.data",
@@ -1732,6 +1734,7 @@ const GAMES = {
     title: "Chart Retard",
     thumbnail: "thumbnails/chartretard.gif",
     emoji: "📈",
+    headerTheme: { bg: '#13151F', text: '#ffffff', glow: false },
     loaderUrl: "/chartretard/Build/chartretard.loader.js",
     config: {
       dataUrl: "/chartretard/Build/chartretard.data",
@@ -1911,6 +1914,43 @@ document.getElementById('pregame-play-btn').addEventListener('click', () => {
   if (!loadedGameId) loadUnityGame(selectedGameId);
 });
 
+function applyGameTheme(gameId) {
+  const game = GAMES[gameId];
+  const theme = game?.headerTheme;
+  const bar = document.getElementById('top-logo-bar');
+  const text = document.getElementById('top-logo-text');
+  const container = document.getElementById('unity-container');
+
+  if (theme) {
+    bar.style.background = theme.bg || 'transparent';
+    text.style.background = 'none';
+    text.style.webkitBackgroundClip = '';
+    text.style.backgroundClip = '';
+    text.style.webkitTextFillColor = theme.text || '#fff';
+    text.style.filter = theme.glow === false ? 'none' : '';
+  }
+
+  // Unity container top: 0 als fullscreen game, anders onder logo bar
+  if (game?.unityFullscreen) {
+    container.style.top = '0';
+  } else {
+    container.style.top = '';
+  }
+}
+
+function resetGameTheme() {
+  const bar = document.getElementById('top-logo-bar');
+  const text = document.getElementById('top-logo-text');
+  const container = document.getElementById('unity-container');
+  bar.style.background = '';
+  text.style.background = '';
+  text.style.webkitBackgroundClip = '';
+  text.style.backgroundClip = '';
+  text.style.webkitTextFillColor = '';
+  text.style.filter = '';
+  container.style.top = '';
+}
+
 function loadUnityGame(gameId) {
   loadedGameId = gameId;
   const game = GAMES[gameId];
@@ -1919,6 +1959,8 @@ function loadUnityGame(gameId) {
   const canvas = document.getElementById('unity-canvas');
   const playBtn = document.getElementById('play-button');
   const unityData = `${telegramId};${username};${chatId};${firstName};${lastName};${gameId}`;
+
+  applyGameTheme(gameId);
 
   if (game.gameConfig) window.GAME_CONFIG = game.gameConfig;
 
@@ -2151,6 +2193,7 @@ document.getElementById('profile-back').addEventListener('click', () => {
 
 document.getElementById('game-back').addEventListener('click', () => {
   stopAchievementPolling();
+  resetGameTheme();
   const overlay = document.getElementById('ui-overlay');
   overlay.style.display = '';
   overlay.classList.remove('hidden');

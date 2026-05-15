@@ -1266,10 +1266,20 @@ function getLevelTitle(level) {
   return "Noob";
 }
 
+const _sfx = {
+  achievement: new Audio('sounds/achievement.wav'),
+  xp: new Audio('sounds/xp.wav'),
+  levelup: new Audio('sounds/levelup.wav'),
+};
+function playSfx(name) {
+  try { const s = _sfx[name]; s.currentTime = 0; s.volume = 0.5; s.play().catch(() => {}); } catch(e) {}
+}
+
 function showLevelUpToast(level) {
   const toast = document.getElementById('levelup-toast');
   toast.textContent = `⬆️ Level up! You are now level ${level} · ${getLevelTitle(level)}`;
   toast.classList.add('show');
+  playSfx('levelup');
   setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
@@ -1284,7 +1294,8 @@ function _runAchievementToastQueue() {
   _achievementToastRunning = true;
   const ach = _achievementToastQueue.shift();
   const toast = document.getElementById('achievement-toast');
-  toast.textContent = `${ach.icon} Achievement unlocked: ${ach.name}`;
+  toast.textContent = `${ach.icon} ${ach.label ?? `Achievement unlocked: ${ach.name}`}`;
+  playSfx(ach.label ? 'xp' : 'achievement');
   toast.classList.add('show');
   setTimeout(() => {
     toast.classList.remove('show');
@@ -1650,7 +1661,7 @@ async function awardXp(xp, reason, game_id = '') {
     const data = await res.json();
     if (data.leveled_up) showLevelUpToast(data.level);
     if (data.xp_gained > 0) {
-      showAchievementToast({ icon: '⭐', name: `+${data.xp_gained} XP earned!` });
+      showAchievementToast({ icon: '⭐', label: `+${data.xp_gained} XP earned!` });
       lastKnownXp = data.total_xp;
     }
     return data;
@@ -2223,7 +2234,7 @@ async function checkAchievementsAfterGame() {
     const newXp = data.xp?.total ?? null;
     if (lastKnownXp !== null && newXp !== null && newXp > lastKnownXp) {
       const gained = newXp - lastKnownXp;
-      showAchievementToast({ icon: '⭐', name: `+${gained} XP earned!` });
+      showAchievementToast({ icon: '⭐', label: `+${gained} XP earned!` });
       lastKnownXp = newXp;
     } else if (newXp !== null && lastKnownXp === null) {
       lastKnownXp = newXp;

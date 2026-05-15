@@ -1424,10 +1424,15 @@ const ACHIEVEMENTS = [
   { id: 'unstoppable',     icon: '💎', name: 'Unstoppable',    desc: '100 days in a row',   check: d => (d.stats?.streak_days || 0) >= 100, progress: d => ({ current: d.stats?.streak_days || 0, max: 100 }) },
 
   // ⭐ Level
-  { id: 'rising_star',     icon: '⭐', name: 'Rising Star',    desc: 'Reach level 10',      check: d => (d.xp?.level || 1) >= 10,  progress: d => ({ current: d.xp?.level || 1, max: 10 }) },
-  { id: 'pro',             icon: '💫', name: 'Pro',            desc: 'Reach level 25',      check: d => (d.xp?.level || 1) >= 25,  progress: d => ({ current: d.xp?.level || 1, max: 25 }) },
-  { id: 'veteran',         icon: '🔱', name: 'Veteran',        desc: 'Reach level 50',      check: d => (d.xp?.level || 1) >= 50,  progress: d => ({ current: d.xp?.level || 1, max: 50 }) },
-  { id: 'immortal',        icon: '👁️', name: 'Immortal',       desc: 'Reach level 100',     check: d => (d.xp?.level || 1) >= 100, progress: d => ({ current: d.xp?.level || 1, max: 100 }) },
+  { id: 'rising_star',  icon: '⭐', name: 'Rising Star',   desc: 'Reach level 10',  xp: 150,   check: d => (d.xp?.level || 1) >= 10,  progress: d => ({ current: d.xp?.level || 1, max: 10 }) },
+  { id: 'pro',          icon: '💫', name: 'Pro',           desc: 'Reach level 25',  xp: 250,   check: d => (d.xp?.level || 1) >= 25,  progress: d => ({ current: d.xp?.level || 1, max: 25 }) },
+  { id: 'veteran_lvl',  icon: '🔱', name: 'Veteran',       desc: 'Reach level 50',  xp: 500,   check: d => (d.xp?.level || 1) >= 50,  progress: d => ({ current: d.xp?.level || 1, max: 50 }) },
+  { id: 'immortal',     icon: '👁️', name: 'Immortal',      desc: 'Reach level 100', xp: 1000,  check: d => (d.xp?.level || 1) >= 100, progress: d => ({ current: d.xp?.level || 1, max: 100 }) },
+  { id: 'btn_masher',   icon: '🕹️', name: 'Button Masher', desc: 'Reach level 200', xp: 2000,  check: d => (d.xp?.level || 1) >= 200, progress: d => ({ current: d.xp?.level || 1, max: 200 }) },
+  { id: 'tryhard_lvl',  icon: '💪', name: 'Tryhard',       desc: 'Reach level 300', xp: 3000,  check: d => (d.xp?.level || 1) >= 300, progress: d => ({ current: d.xp?.level || 1, max: 300 }) },
+  { id: 'gamer_lvl',    icon: '🎮', name: 'Gamer',         desc: 'Reach level 500', xp: 5000,  check: d => (d.xp?.level || 1) >= 500, progress: d => ({ current: d.xp?.level || 1, max: 500 }) },
+  { id: 'legend_lvl',   icon: '🌟', name: 'Legend',        desc: 'Reach level 700', xp: 10000, check: d => (d.xp?.level || 1) >= 700, progress: d => ({ current: d.xp?.level || 1, max: 700 }) },
+  { id: 'god_mode_lvl', icon: '🛸', name: 'GOD',           desc: 'Reach level 999', xp: 25000, check: d => (d.xp?.level || 1) >= 999, progress: d => ({ current: d.xp?.level || 1, max: 999 }) },
 
   // 🌍 Variatie
   { id: 'globe_trotter',   icon: '🌍', name: 'Globe Trotter',  desc: 'Play 3 different games', check: d => d.games.filter(g => g.score !== null).length >= 3, progress: d => ({ current: d.games.filter(g => g.score !== null).length, max: 3 }) },

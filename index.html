@@ -804,12 +804,56 @@ body.game-playing #bg-orbs {
   padding: 9px 10px;
   transition: border-color 0.2s;
 }
+.achievement { cursor: pointer; }
+.achievement:active { opacity: 0.7; }
 .achievement.unlocked { border-color: #f0f6; }
 .achievement.locked { opacity: 0.4; filter: grayscale(0.6); }
 .achievement-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
 .achievement-info { min-width: 0; }
 .achievement-name { font-size: 11px; font-weight: 700; color: #fff; }
 .achievement-desc { font-size: 9px; color: #f0f8; margin-top: 1px; }
+.achievement-progress { font-size: 9px; color: #00f0ff; margin-top: 2px; font-weight: 700; letter-spacing: 0.5px; }
+
+/* Achievement modal */
+#ach-modal-backdrop {
+  display: none;
+  position: fixed; inset: 0; z-index: 99998;
+  background: rgba(0,0,0,0.7);
+  align-items: center; justify-content: center;
+}
+#ach-modal-backdrop.open { display: flex; }
+#ach-modal {
+  background: linear-gradient(160deg, #1a0035 0%, #0a0018 100%);
+  border: 1px solid #f0f5;
+  border-radius: 18px;
+  padding: 28px 24px 24px;
+  max-width: 280px;
+  width: 85%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 0 40px #9000ff44;
+}
+#ach-modal-icon { font-size: 48px; margin-bottom: 10px; display: block; }
+#ach-modal-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+#ach-modal-desc { font-size: 12px; color: #ccc; margin-bottom: 14px; line-height: 1.5; }
+#ach-modal-status {
+  font-size: 11px; font-weight: 700; border-radius: 20px;
+  padding: 4px 12px; display: inline-block; margin-bottom: 14px;
+}
+#ach-modal-status.unlocked { background: #9000ff33; color: #c060ff; border: 1px solid #9000ff66; }
+#ach-modal-status.locked { background: #ffffff11; color: #888; border: 1px solid #ffffff22; }
+#ach-modal-progress-wrap { margin-bottom: 14px; }
+#ach-modal-progress-label { font-size: 10px; color: #00f0ff; font-weight: 700; margin-bottom: 5px; }
+#ach-modal-progress-bar-bg {
+  height: 6px; background: #ffffff15; border-radius: 4px; overflow: hidden;
+}
+#ach-modal-progress-bar { height: 100%; background: linear-gradient(90deg, #00f0ff, #9000ff); border-radius: 4px; transition: width 0.4s; }
+#ach-modal-xp { font-size: 11px; color: #ffd700; font-weight: 700; }
+#ach-modal-close {
+  position: absolute; top: 12px; right: 14px;
+  font-size: 18px; color: #888; cursor: pointer; line-height: 1;
+  background: none; border: none; padding: 4px;
+}
 
 /* Game scores lijst */
 #profile-game-scores {
@@ -1197,6 +1241,24 @@ body.game-playing #bg-orbs {
 <!-- Achievement toast -->
 <div id="achievement-toast"></div>
 
+<!-- Achievement detail modal -->
+<div id="ach-modal-backdrop" onclick="closeAchModal(event)">
+  <div id="ach-modal">
+    <button id="ach-modal-close" onclick="_closeAchModalBtn()">✕</button>
+    <span id="ach-modal-icon"></span>
+    <div id="ach-modal-name"></div>
+    <div id="ach-modal-desc"></div>
+    <span id="ach-modal-status"></span>
+    <div id="ach-modal-progress-wrap" style="display:none">
+      <div id="ach-modal-progress-label"></div>
+      <div id="ach-modal-progress-bar-bg">
+        <div id="ach-modal-progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+    <div id="ach-modal-xp"></div>
+  </div>
+</div>
+
 <!-- PRE-GAME SCREEN -->
 <div id="screen-pregame" class="screen hidden">
   <div id="pregame-back">← All Games</div>
@@ -1326,48 +1388,48 @@ function checkNewAchievements(data) {
 // ===== ACHIEVEMENTS CONFIG =====
 const ACHIEVEMENTS = [
   // 🥇 #1 tiers
-  { id: 'throne_1',    icon: '🥇', name: 'First Throne', desc: 'Reach #1 once',        xp: 200,   check: d => (d.stats?.times_reached_1st || 0) >= 1 },
-  { id: 'throne_5',    icon: '🏆', name: 'Top Dog',      desc: 'Reach #1 five times',  xp: 300,   check: d => (d.stats?.times_reached_1st || 0) >= 5 },
-  { id: 'throne_10',   icon: '👑', name: 'King',         desc: 'Reach #1 ten times',   xp: 500,   check: d => (d.stats?.times_reached_1st || 0) >= 10 },
-  { id: 'throne_25',   icon: '💪', name: 'Dominator',    desc: 'Reach #1 25 times',    xp: 750,   check: d => (d.stats?.times_reached_1st || 0) >= 25 },
-  { id: 'throne_50',   icon: '🌟', name: 'Supreme',      desc: 'Reach #1 50 times',    xp: 1500,  check: d => (d.stats?.times_reached_1st || 0) >= 50 },
-  { id: 'throne_100',  icon: '🔱', name: 'Untouchable',  desc: 'Reach #1 100 times',   xp: 3000,  check: d => (d.stats?.times_reached_1st || 0) >= 100 },
-  { id: 'throne_250',  icon: '💎', name: 'Legendary',    desc: 'Reach #1 250 times',   xp: 7500,  check: d => (d.stats?.times_reached_1st || 0) >= 250 },
-  { id: 'throne_1000', icon: '🛸', name: 'GOD Mode',     desc: 'Reach #1 1000 times',  xp: 25000, check: d => (d.stats?.times_reached_1st || 0) >= 1000 },
+  { id: 'throne_1',    icon: '🥇', name: 'First Throne', desc: 'Reach #1 once',        xp: 200,   check: d => (d.stats?.times_reached_1st || 0) >= 1,    progress: d => ({ current: d.stats?.times_reached_1st || 0, max: 1 }) },
+  { id: 'throne_5',    icon: '🏆', name: 'Top Dog',      desc: 'Reach #1 five times',  xp: 300,   check: d => (d.stats?.times_reached_1st || 0) >= 5,    progress: d => ({ current: d.stats?.times_reached_1st || 0, max: 5 }) },
+  { id: 'throne_10',   icon: '👑', name: 'King',         desc: 'Reach #1 ten times',   xp: 500,   check: d => (d.stats?.times_reached_1st || 0) >= 10,   progress: d => ({ current: d.stats?.times_reached_1st || 0, max: 10 }) },
+  { id: 'throne_25',   icon: '💪', name: 'Dominator',    desc: 'Reach #1 25 times',    xp: 750,   check: d => (d.stats?.times_reached_1st || 0) >= 25,   progress: d => ({ current: d.stats?.times_reached_1st || 0, max: 25 }) },
+  { id: 'throne_50',   icon: '🌟', name: 'Supreme',      desc: 'Reach #1 50 times',    xp: 1500,  check: d => (d.stats?.times_reached_1st || 0) >= 50,   progress: d => ({ current: d.stats?.times_reached_1st || 0, max: 50 }) },
+  { id: 'throne_100',  icon: '🔱', name: 'Untouchable',  desc: 'Reach #1 100 times',   xp: 3000,  check: d => (d.stats?.times_reached_1st || 0) >= 100,  progress: d => ({ current: d.stats?.times_reached_1st || 0, max: 100 }) },
+  { id: 'throne_250',  icon: '💎', name: 'Legendary',    desc: 'Reach #1 250 times',   xp: 7500,  check: d => (d.stats?.times_reached_1st || 0) >= 250,  progress: d => ({ current: d.stats?.times_reached_1st || 0, max: 250 }) },
+  { id: 'throne_1000', icon: '🛸', name: 'GOD Mode',     desc: 'Reach #1 1000 times',  xp: 25000, check: d => (d.stats?.times_reached_1st || 0) >= 1000, progress: d => ({ current: d.stats?.times_reached_1st || 0, max: 1000 }) },
 
   // 🎮 Games gespeeld
-  { id: 'first_blood',     icon: '🎮', name: 'First Blood',    desc: 'Play 1 game',         check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 1 },
-  { id: 'regular',         icon: '🎯', name: 'Regular',        desc: 'Play 50 games',       check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 50 },
-  { id: 'grinder',         icon: '🕹️', name: 'Grinder',        desc: 'Play 500 games',      check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 500 },
-  { id: 'no_life_games',   icon: '💀', name: 'No Life',        desc: 'Play 5000 games',     check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 5000 },
+  { id: 'first_blood',     icon: '🎮', name: 'First Blood',    desc: 'Play 1 game',         check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 1,    progress: d => ({ current: d.total_games_played || d.stats?.games_played_total || 0, max: 1 }) },
+  { id: 'regular',         icon: '🎯', name: 'Regular',        desc: 'Play 50 games',       check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 50,   progress: d => ({ current: d.total_games_played || d.stats?.games_played_total || 0, max: 50 }) },
+  { id: 'grinder',         icon: '🕹️', name: 'Grinder',        desc: 'Play 500 games',      check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 500,  progress: d => ({ current: d.total_games_played || d.stats?.games_played_total || 0, max: 500 }) },
+  { id: 'no_life_games',   icon: '💀', name: 'No Life',        desc: 'Play 5000 games',     check: d => (d.total_games_played || d.stats?.games_played_total || 0) >= 5000, progress: d => ({ current: d.total_games_played || d.stats?.games_played_total || 0, max: 5000 }) },
 
   // ⏱️ Speeltijd
-  { id: 'casual',          icon: '⏱️', name: 'Casual',         desc: '1 hour played',       check: d => (d.stats?.playtime_hours || 0) >= 1 },
-  { id: 'hooked',          icon: '🕰️', name: 'Hooked',         desc: '10 hours played',     check: d => (d.stats?.playtime_hours || 0) >= 10 },
-  { id: 'addicted',        icon: '😵', name: 'Addicted',       desc: '100 hours played',    check: d => (d.stats?.playtime_hours || 0) >= 100 },
-  { id: 'no_life_time',    icon: '☠️', name: 'No Life',        desc: '1000 hours played',   check: d => (d.stats?.playtime_hours || 0) >= 1000 },
+  { id: 'casual',          icon: '⏱️', name: 'Casual',         desc: '1 hour played',       check: d => (d.stats?.playtime_hours || 0) >= 1,    progress: d => ({ current: +(d.stats?.playtime_hours || 0).toFixed(1), max: 1 }) },
+  { id: 'hooked',          icon: '🕰️', name: 'Hooked',         desc: '10 hours played',     check: d => (d.stats?.playtime_hours || 0) >= 10,   progress: d => ({ current: +(d.stats?.playtime_hours || 0).toFixed(1), max: 10 }) },
+  { id: 'addicted',        icon: '😵', name: 'Addicted',       desc: '100 hours played',    check: d => (d.stats?.playtime_hours || 0) >= 100,  progress: d => ({ current: +(d.stats?.playtime_hours || 0).toFixed(1), max: 100 }) },
+  { id: 'no_life_time',    icon: '☠️', name: 'No Life',        desc: '1000 hours played',   check: d => (d.stats?.playtime_hours || 0) >= 1000, progress: d => ({ current: +(d.stats?.playtime_hours || 0).toFixed(1), max: 1000 }) },
 
   // ⚔️ PvP wins
-  { id: 'pvp_fighter',     icon: '⚔️', name: 'PvP Fighter',   desc: '1 PvP win',            check: d => (d.pvp?.wins || 0) >= 1 },
-  { id: 'brawler',         icon: '🥊', name: 'Brawler',        desc: '25 PvP wins',         check: d => (d.pvp?.wins || 0) >= 25 },
-  { id: 'pvp_king',        icon: '👊', name: 'PvP King',       desc: '100 PvP wins',        check: d => (d.pvp?.wins || 0) >= 100 },
-  { id: 'destroyer',       icon: '💣', name: 'Destroyer',      desc: '500 PvP wins',        check: d => (d.pvp?.wins || 0) >= 500 },
+  { id: 'pvp_fighter',     icon: '⚔️', name: 'PvP Fighter',   desc: '1 PvP win',            check: d => (d.pvp?.wins || 0) >= 1,   progress: d => ({ current: d.pvp?.wins || 0, max: 1 }) },
+  { id: 'brawler',         icon: '🥊', name: 'Brawler',        desc: '25 PvP wins',         check: d => (d.pvp?.wins || 0) >= 25,  progress: d => ({ current: d.pvp?.wins || 0, max: 25 }) },
+  { id: 'pvp_king',        icon: '👊', name: 'PvP King',       desc: '100 PvP wins',        check: d => (d.pvp?.wins || 0) >= 100, progress: d => ({ current: d.pvp?.wins || 0, max: 100 }) },
+  { id: 'destroyer',       icon: '💣', name: 'Destroyer',      desc: '500 PvP wins',        check: d => (d.pvp?.wins || 0) >= 500, progress: d => ({ current: d.pvp?.wins || 0, max: 500 }) },
 
   // 🔥 Dagelijkse streak
-  { id: 'hot_streak',      icon: '🔥', name: 'Hot Streak',     desc: '3 days in a row',     check: d => (d.stats?.streak_days || 0) >= 3 },
-  { id: 'dedicated',       icon: '📅', name: 'Dedicated',      desc: '7 days in a row',     check: d => (d.stats?.streak_days || 0) >= 7 },
-  { id: 'iron_will',       icon: '🏅', name: 'Iron Will',      desc: '30 days in a row',    check: d => (d.stats?.streak_days || 0) >= 30 },
-  { id: 'unstoppable',     icon: '💎', name: 'Unstoppable',    desc: '100 days in a row',   check: d => (d.stats?.streak_days || 0) >= 100 },
+  { id: 'hot_streak',      icon: '🔥', name: 'Hot Streak',     desc: '3 days in a row',     check: d => (d.stats?.streak_days || 0) >= 3,   progress: d => ({ current: d.stats?.streak_days || 0, max: 3 }) },
+  { id: 'dedicated',       icon: '📅', name: 'Dedicated',      desc: '7 days in a row',     check: d => (d.stats?.streak_days || 0) >= 7,   progress: d => ({ current: d.stats?.streak_days || 0, max: 7 }) },
+  { id: 'iron_will',       icon: '🏅', name: 'Iron Will',      desc: '30 days in a row',    check: d => (d.stats?.streak_days || 0) >= 30,  progress: d => ({ current: d.stats?.streak_days || 0, max: 30 }) },
+  { id: 'unstoppable',     icon: '💎', name: 'Unstoppable',    desc: '100 days in a row',   check: d => (d.stats?.streak_days || 0) >= 100, progress: d => ({ current: d.stats?.streak_days || 0, max: 100 }) },
 
   // ⭐ Level
-  { id: 'rising_star',     icon: '⭐', name: 'Rising Star',    desc: 'Reach level 10',      check: d => (d.xp?.level || 1) >= 10 },
-  { id: 'pro',             icon: '💫', name: 'Pro',            desc: 'Reach level 25',      check: d => (d.xp?.level || 1) >= 25 },
-  { id: 'veteran',         icon: '🔱', name: 'Veteran',        desc: 'Reach level 50',      check: d => (d.xp?.level || 1) >= 50 },
-  { id: 'immortal',        icon: '👁️', name: 'Immortal',       desc: 'Reach level 100',     check: d => (d.xp?.level || 1) >= 100 },
+  { id: 'rising_star',     icon: '⭐', name: 'Rising Star',    desc: 'Reach level 10',      check: d => (d.xp?.level || 1) >= 10,  progress: d => ({ current: d.xp?.level || 1, max: 10 }) },
+  { id: 'pro',             icon: '💫', name: 'Pro',            desc: 'Reach level 25',      check: d => (d.xp?.level || 1) >= 25,  progress: d => ({ current: d.xp?.level || 1, max: 25 }) },
+  { id: 'veteran',         icon: '🔱', name: 'Veteran',        desc: 'Reach level 50',      check: d => (d.xp?.level || 1) >= 50,  progress: d => ({ current: d.xp?.level || 1, max: 50 }) },
+  { id: 'immortal',        icon: '👁️', name: 'Immortal',       desc: 'Reach level 100',     check: d => (d.xp?.level || 1) >= 100, progress: d => ({ current: d.xp?.level || 1, max: 100 }) },
 
   // 🌍 Variatie
-  { id: 'globe_trotter',   icon: '🌍', name: 'Globe Trotter',  desc: 'Play 3 different games', check: d => d.games.filter(g => g.score !== null).length >= 3 },
-  { id: 'completionist',   icon: '🕹️', name: 'Completionist',  desc: 'Play all 9 games',       check: d => d.games.filter(g => g.score !== null).length >= 9 },
+  { id: 'globe_trotter',   icon: '🌍', name: 'Globe Trotter',  desc: 'Play 3 different games', check: d => d.games.filter(g => g.score !== null).length >= 3, progress: d => ({ current: d.games.filter(g => g.score !== null).length, max: 3 }) },
+  { id: 'completionist',   icon: '🕹️', name: 'Completionist',  desc: 'Play all 9 games',       check: d => d.games.filter(g => g.score !== null).length >= 9, progress: d => ({ current: d.games.filter(g => g.score !== null).length, max: 9 }) },
 ];
 
 // ===== PROFIEL LADEN =====
@@ -1400,7 +1462,10 @@ async function loadProfile() {
   // Wallet laadt pas bij klikken op WALLET knop
 }
 
+let _lastProfileData = null;
+
 function renderProfileData(data) {
+  _lastProfileData = data;
   // XP / level
   const xp = data.xp || {};
   const level = xp.level || 1;
@@ -1428,6 +1493,10 @@ function renderProfileData(data) {
   achWrap.innerHTML = '';
   ACHIEVEMENTS.forEach(ach => {
     const unlocked = ach.check(data);
+    const prog = ach.progress ? ach.progress(data) : null;
+    const progHtml = prog && !unlocked
+      ? `<div class="achievement-progress">${Math.min(prog.current, prog.max)} / ${prog.max}</div>`
+      : '';
     const div = document.createElement('div');
     div.className = `achievement ${unlocked ? 'unlocked' : 'locked'}`;
     div.innerHTML = `
@@ -1435,8 +1504,10 @@ function renderProfileData(data) {
       <div class="achievement-info">
         <div class="achievement-name">${ach.name}</div>
         <div class="achievement-desc">${ach.desc}</div>
+        ${progHtml}
       </div>
     `;
+    div.addEventListener('click', () => openAchModal(ach, unlocked));
     achWrap.appendChild(div);
   });
   checkNewAchievements(data);
@@ -2238,12 +2309,45 @@ async function checkAchievementsAfterGame() {
     const newXp = data.xp?.total ?? null;
     if (lastKnownXp !== null && newXp !== null && newXp > lastKnownXp) {
       const gained = newXp - lastKnownXp;
+      showAchievementToast({ icon: '🏆', label: 'New Highscore!' });
       showAchievementToast({ icon: '⭐', label: `+${gained} XP earned!` });
       lastKnownXp = newXp;
     } else if (newXp !== null && lastKnownXp === null) {
       lastKnownXp = newXp;
     }
   } catch(e) {}
+}
+
+// ===== ACHIEVEMENT MODAL =====
+function openAchModal(ach, unlocked) {
+  const data = _lastProfileData;
+  document.getElementById('ach-modal-icon').textContent = ach.icon;
+  document.getElementById('ach-modal-name').textContent = ach.name;
+  document.getElementById('ach-modal-desc').textContent = ach.desc;
+  const statusEl = document.getElementById('ach-modal-status');
+  statusEl.textContent = unlocked ? '✓ Unlocked' : '🔒 Locked';
+  statusEl.className = unlocked ? 'unlocked' : 'locked';
+  document.getElementById('ach-modal-xp').textContent = `Reward: ${(ach.xp ?? 150).toLocaleString()} XP`;
+  const progWrap = document.getElementById('ach-modal-progress-wrap');
+  if (ach.progress && data && !unlocked) {
+    const prog = ach.progress(data);
+    const current = Math.min(prog.current, prog.max);
+    const pct = prog.max > 0 ? Math.round(current / prog.max * 100) : 0;
+    document.getElementById('ach-modal-progress-label').textContent = `${current} / ${prog.max}`;
+    document.getElementById('ach-modal-progress-bar').style.width = pct + '%';
+    progWrap.style.display = '';
+  } else {
+    progWrap.style.display = 'none';
+  }
+  document.getElementById('ach-modal-backdrop').classList.add('open');
+}
+
+function closeAchModal(e) {
+  if (e && e.target !== document.getElementById('ach-modal-backdrop')) return;
+  document.getElementById('ach-modal-backdrop').classList.remove('open');
+}
+function _closeAchModalBtn() {
+  document.getElementById('ach-modal-backdrop').classList.remove('open');
 }
 
 window.onGameOver = function() {

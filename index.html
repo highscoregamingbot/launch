@@ -1833,6 +1833,8 @@ function selectGame(gameId) {
   const game = GAMES[gameId];
   if (!game) return;
 
+  resetGameTheme();
+
   document.getElementById('pregame-title').textContent = game.title;
   document.getElementById('pregame-thumb-img').src = game.thumbnail;
   document.getElementById('pregame-rank-value').textContent = '—';
